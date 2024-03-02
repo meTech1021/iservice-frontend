@@ -65,6 +65,8 @@ import ForgotPassword from "auth/forgot-password";
 import ResetPassword from "auth/reset-password";
 import AuthService from "services/auth-service";
 import { Helmet } from "react-helmet";
+import EmailVerification from "auth/verify-email";
+import VerifyEmailPage from "auth/verify-email/verify";
 
 export default function App({ ability }) {
   const [controller, dispatch] = useMaterialUIController();
@@ -336,6 +338,8 @@ export default function App({ ability }) {
             <Route path="/auth/register" element={<Register />} />
             <Route path="/auth/forgot-password" element={<ForgotPassword />} />
             <Route path="/auth/reset-password" element={<ResetPassword />} />
+            <Route path="/auth/verifyemail" element={<EmailVerification />} />
+            <Route path="/auth/verifyemail/:token" element={<VerifyEmailPage />} />
             {getRoutes(routes)}
             {getCrudRoutes(crudRoutes)}
             <Route path="*" element={<Navigate to="/dashboards/analytics" />} />

@@ -11,6 +11,11 @@ class AuthService {
     return await HttpService.post(registerEndpoint, credentials);
   };
 
+  verifyEmail = async (token) => {
+    const verifyEmailEndpoint = `verify-email?token=${token}`; // Construct the endpoint URL with the token
+    return await HttpService.get(verifyEmailEndpoint);
+  };
+  
   logout = async () => {
     const logoutEndpoint = "logout";
     return await HttpService.post(logoutEndpoint);

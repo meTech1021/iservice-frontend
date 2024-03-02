@@ -39,14 +39,6 @@ function IllustrationLayout({ header, title, description, illustration, children
 
   return (
     <PageLayout background="white">
-      <DefaultNavbar
-        routes={pageRoutes}
-        action={{
-          type: "external",
-          route: "https://www.creative-tim.com/product/material-dashboard-pro-react-nodejs",
-          label: "buy now",
-        }}
-      />
       <Grid
         container
         sx={{

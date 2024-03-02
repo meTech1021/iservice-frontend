@@ -36,16 +36,7 @@ import pageRoutes from "routes/page";
 function CoverLayout({ coverHeight, image, children }) {
   return (
     <PageLayout>
-      <DefaultNavbar
-        routes={pageRoutes}
-        action={{
-          type: "external",
-          route: "https://www.creative-tim.com/product/material-dashboard-pro-react-nodejs",
-          label: "buy now",
-        }}
-        transparent
-        light
-      />
+
       <MDBox
         width="calc(100% - 2rem)"
         minHeight={coverHeight}

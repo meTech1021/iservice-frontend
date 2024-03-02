@@ -15,7 +15,7 @@ Coded by www.creative-tim.com
 
 // react-router-dom components
 import { useContext, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 // @mui material components
 import Card from "@mui/material/Card";
@@ -39,6 +39,7 @@ import { InputLabel } from "@mui/material";
 
 function Register() {
   const authContext = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const [inputs, setInputs] = useState({
     name: "",
@@ -116,7 +117,9 @@ function Register() {
 
     try {
       const response = await AuthService.register(myData);
-      authContext.login(response.access_token);
+      console.log(response, 'response')
+      if(response.status === 200)
+        navigate('/auth/verifyemail');
     } catch (err) {
       setErrors({ ...errors, emailTaken: true });
       console.error(err);
@@ -326,7 +329,7 @@ function Register() {
             )}
             <MDBox mt={4} mb={1}>
               <MDButton variant="gradient" color="info" fullWidth type="submit">
-                sign in
+                sign up
               </MDButton>
             </MDBox>
             <MDBox mt={3} mb={1} textAlign="center">

@@ -35,16 +35,6 @@ import Footer from "layouts/authentication/components/Footer";
 function BasicLayout({ image, children }) {
   return (
     <PageLayout>
-      <DefaultNavbar
-        routes={pageRoutes}
-        action={{
-          type: "external",
-          route: "https://www.creative-tim.com/product/material-dashboard-pro-react-nodejs",
-          label: "buy now",
-        }}
-        transparent
-        light
-      />
       <MDBox
         position="absolute"
         width="100%"

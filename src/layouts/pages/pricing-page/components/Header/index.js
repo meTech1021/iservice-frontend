@@ -39,17 +39,6 @@ import bgImage from "assets/images/bg-pricing.jpg";
 function Header({ tabValue, tabHandler, children }) {
   return (
     <>
-      <DefaultNavbar
-        routes={pageRoutes}
-        action={{
-          type: "external",
-          route: "https://www.creative-tim.com/product/material-dashboard-pro-react-nodejs",
-          label: "buy now",
-          color: "light",
-        }}
-        transparent
-        light
-      />
       <MDBox
         position="relative"
         minHeight="50vh"
