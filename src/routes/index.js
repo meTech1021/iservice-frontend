@@ -67,14 +67,14 @@ import ResetCover from "layouts/authentication/reset-password/cover";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { faNode } from "@fortawesome/free-brands-svg-icons";
-
+import { faUser, faInfo, faHistory, faContactBook } from "@fortawesome/free-solid-svg-icons";
 import UserProfile from "cruds/user-profile";
 import RoleManagement from "cruds/role-managament";
-import CategoryManagement from "cruds/category-management";
+import CompanyManagement from "cruds/company-management";
 import TagManagement from "cruds/tag-management";
 import UserManagement from "cruds/user-management";
 import ItemManagement from "cruds/item-management";
+import EntityManagement from "cruds/entity-management";
 
 // Material Dashboard 2 PRO React components
 import MDAvatar from "components/MDAvatar";
@@ -84,6 +84,12 @@ import Icon from "@mui/material/Icon";
 
 // Images
 import profilePicture from "assets/images/team-3.jpg";
+import EventLogManagement from "cruds/eventlog-management";
+import InternalDeviceManagement from "cruds/device-management/internal-device-management";
+import ContactManagement from "cruds/contact-management";
+import APIManagement from "cruds/api-management";
+import ExternalDeviceManagement from "cruds/device-management/external-device-management";
+import MonitorManagement from "cruds/device-management/monitor-management";
 
 const routes = [
   {
@@ -94,10 +100,16 @@ const routes = [
     collapse: [
       {
         name: "My Profile",
-        key: "profile-overview",
-        route: "/pages/profile/profile-overview",
-        component: <ProfileOverview />,
+        key: "user-profile",
+        route: "/user-profile",
+        component: <UserProfile />,
       },
+      // {
+      //   name: "My Profile",
+      //   key: "profile-overview",
+      //   route: "/pages/profile/profile-overview",
+      //   component: <ProfileOverview />,
+      // },
       {
         name: "Settings",
         key: "settings",
@@ -111,6 +123,130 @@ const routes = [
     ],
   },
   { type: "divider", key: "divider-0" },
+  {
+    type: "collapse",
+    name: "Set Up",
+    key: "setup",
+    icon: <FontAwesomeIcon icon={faUser} size="sm" />,
+    collapse: [
+      {
+        name: "API Credentials",
+        key: "api-management",
+        route: "/api-management",
+        component: <APIManagement />,
+        type: "apis",
+      },
+      {
+        name: "Companies",
+        key: "company-management",
+        route: "/company-management",
+        component: <CompanyManagement />,
+        type: "companies",
+      },
+      {
+        name: "Devices",
+        key: "internal-device-management",
+        collapse: [
+          {
+            name: "Internal Devices",
+            key: "internal-devices",
+            route: "/internal-device-management",
+            component: <InternalDeviceManagement />,
+            type: "devices",    
+          },
+          {
+            name: "External Devices",
+            key: "external-devices",
+            route: "/external-device-management",
+            component: <ExternalDeviceManagement />,
+            type: "devices",    
+          },
+          {
+            name: "Monitor",
+            key: "monitors",
+            route: "/monitor-management",
+            component: <MonitorManagement />,
+            type: "devices",    
+          },
+        ],
+      },
+      {
+        name: "Items",
+        key: "item-management",
+        route: "/item-management",
+        component: <ItemManagement />,
+        type: "items",
+      },
+      {
+        name: "Roles",
+        key: "role-management",
+        route: "/role-management",
+        component: <RoleManagement />,
+        type: "roles",
+      },
+      {
+        name: "Users",
+        key: "user-management",
+        route: "/user-management",
+        component: <UserManagement />,
+        type: "users",
+      },
+      {
+        name: "Tag Management",
+        key: "tag-management",
+        route: "/tag-management",
+        component: <TagManagement />,
+        type: "tags",
+      },
+    ],
+  },
+  { type: "divider", key: "divider-1" },
+  {
+    type: "collapse",
+    name: "Entities",
+    key: "entity",
+    icon: <FontAwesomeIcon icon={faInfo} size="sm" />,
+    collapse: [
+      {
+        name: "Entities",
+        key: "entity-management",
+        route: "/entity-management",
+        component: <EntityManagement />,
+        // type: "entities",
+      }]
+  },
+  { type: "divider", key: "divider-2" },
+  {
+    type: "collapse",
+    name: "Contacts",
+    key: "contact",
+    icon: <FontAwesomeIcon icon={faContactBook} size="sm" />,
+    collapse: [
+      {
+        name: "contacts",
+        key: "contact-management",
+        route: "/contact-management",
+        component: <ContactManagement />,
+        // type: "contacts",
+      }]
+  },
+  { type: "divider", key: "divider-3" },
+  {
+    type: "collapse",
+    name: "Event Logs",
+    key: "eventlog",
+    icon: <FontAwesomeIcon icon={faHistory} size="sm" />,
+    collapse: [
+      {
+        name: "Event Logs",
+        key: "eventlog-management",
+        route: "/eventlog-management",
+        component: <EventLogManagement />,
+        // type: "eventlogs",
+      }]
+  },
+
+  { type: "divider", key: "divider-4" },
   {
     type: "collapse",
     name: "Dashboards",
@@ -128,56 +264,6 @@ const routes = [
         key: "sales",
         route: "/dashboards/sales",
         component: <Sales />,
-      },
-    ],
-  },
-  { type: "title", title: "React + NodeJS", key: "crud-pages" },
-  {
-    type: "collapse",
-    name: "Examples (API)",
-    key: "react-nodejs",
-    icon: <FontAwesomeIcon icon={faNode} size="sm" />,
-    collapse: [
-      {
-        name: "User Profile",
-        key: "user-profile",
-        route: "/examples-api/user-profile",
-        component: <UserProfile />,
-      },
-      {
-        name: "User Management",
-        key: "user-management",
-        route: "/examples-api/user-management",
-        component: <UserManagement />,
-        type: "users",
-      },
-      {
-        name: "Role Management",
-        key: "role-management",
-        route: "/examples-api/role-management",
-        component: <RoleManagement />,
-        type: "roles",
-      },
-      {
-        name: "Category Management",
-        key: "category-management",
-        route: "/examples-api/category-management",
-        component: <CategoryManagement />,
-        type: "categories",
-      },
-      {
-        name: "Tag Management",
-        key: "tag-management",
-        route: "/examples-api/tag-management",
-        component: <TagManagement />,
-        type: "tags",
-      },
-      {
-        name: "Item Management",
-        key: "item-management",
-        route: "/examples-api/item-management",
-        component: <ItemManagement />,
-        type: "items",
       },
     ],
   },
@@ -409,7 +495,7 @@ const routes = [
       },
     ],
   },
-  { type: "divider", key: "divider-1" },
+  { type: "divider", key: "divider-5" },
   { type: "title", title: "Docs", key: "title-docs" },
   {
     type: "collapse",

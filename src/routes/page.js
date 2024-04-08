@@ -171,41 +171,41 @@ const pageRoutes = [
     ],
   },
   {
-    name: "Examples (API)",
+    name: "Set Up",
     // type: "react-nodejs",
     collapse: [
       {
         name: "user-profile",
-        route: "/examples-api/user-profile",
+        route: "/user-profile",
         icon: "person",
       },
       {
         name: "user-management",
-        route: "/examples-api/user-management",
+        route: "/user-management",
         icon: "list",
         subject: "users",
       },
       {
         name: "role-management",
-        route: "/examples-api/role-management",
+        route: "/role-management",
         icon: "list",
         subject: "roles",
       },
       {
         name: "tag-management",
-        route: "/examples-api/tag-management",
+        route: "/tag-management",
         icon: "list",
         subject: "tags",
       },
       {
         name: "category-management",
-        route: "/examples-api/category-management",
+        route: "/category-management",
         icon: "list",
         subject: "categories",
       },
       {
         name: "item-management",
-        route: "/examples-api/item-management",
+        route: "/item-management",
         icon: "list",
         subject: "items",
       },

@@ -58,6 +58,7 @@ function RoleManagement() {
       setData(response.data);
       setIsDemo(process.env.REACT_APP_IS_DEMO === "true");
     })();
+    document.title = `RIVIO | Roles`;
   }, []);
 
   useEffect(() => {
@@ -142,6 +143,16 @@ function RoleManagement() {
           return (
             <MDBox display="flex" alignItems="center">
               <Can I="delete" a="users">
+                {ability.can("edit", "roles") && (
+                  <Tooltip
+                    title="Edit Role"
+                    onClick={() => clickEditHandler(info.cell.row.original.id)}
+                  >
+                    <IconButton>
+                      <EditIcon />
+                    </IconButton>
+                  </Tooltip>
+                )}
                 {isDemo ? (
                   getId(info.cell.row.original.id) !== 1 &&
                   getId(info.cell.row.original.id) !== 2 &&
@@ -166,16 +177,6 @@ function RoleManagement() {
                   </Tooltip>
                 )}
               </Can>
-              {ability.can("edit", "roles") && (
-                <Tooltip
-                  title="Edit Role"
-                  onClick={() => clickEditHandler(info.cell.row.original.id)}
-                >
-                  <IconButton>
-                    <EditIcon />
-                  </IconButton>
-                </Tooltip>
-              )}
             </MDBox>
           );
         },
@@ -215,7 +216,7 @@ function RoleManagement() {
                 </MDButton>
               )}
             </MDBox>
-            <DataTable table={dataTableData} />
+            <DataTable table={dataTableData} canSearch={true} />
           </Card>
         </MDBox>
       </MDBox>

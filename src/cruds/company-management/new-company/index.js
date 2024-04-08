@@ -13,37 +13,73 @@ Coded by www.creative-tim.com
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // @mui material components
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
-
 // Material Dashboard 2 PRO React components
 import MDBox from "components/MDBox";
 import MDButton from "components/MDButton";
 import MDTypography from "components/MDTypography";
-import MDEditor from "components/MDEditor";
+import MDInput from "components/MDInput";
 
 // Material Dashboard 2 PRO React examples
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import FormField from "layouts/applications/wizard/components/FormField";
+import ModalAddress from "cruds/address-management";
 import { useNavigate } from "react-router-dom";
+import { MODULE_MASTER } from "utils/constant"
+import { jwtDecode } from 'jwt-decode';
+import { ToastContainer, toast } from 'react-toastify';
+import 'material-react-toastify/dist/ReactToastify.css';
 
 import CrudService from "services/cruds-service";
 
-const NewCategory = () => {
+const NewCompany = () => {
   const navigate = useNavigate();
+
   const [name, setName] = useState({
     text: "",
     error: false,
     textError: "",
   });
 
-  const [description, setDescription] = useState("");
-  const [descError, setDescError] = useState(false);
+  const [organization, setOrganization] = useState("");
+  const [addressTypes, setAddressTypes] = useState([]);
+  const [statusOptions, setStatusOptions] = useState([]);
+  const [addresses, setAddresses] = useState([]);
+  const [selectedId, setSelectedId] = useState(0);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const decoded = jwtDecode(token);
+      setOrganization(decoded.organization);
+    }
+
+    (async () => {
+      try {
+        const response = await CrudService.getAddressTypes();
+        setAddressTypes(response.data);
+      } catch (err) {
+        console.error(err);
+        return null;
+      }
+    })();
+
+    (async () => {
+      try {
+        const response = await CrudService.getStatusTypes(MODULE_MASTER.COMPANIES);
+        setStatusOptions(response.data);
+      } catch (err) {
+        console.error(err);
+        return null;
+      }
+    })();
+  }, []);
 
   const changeNameHandler = (e) => {
     setName({ ...name, text: e.target.value });
@@ -53,30 +89,63 @@ const NewCategory = () => {
     e.preventDefault();
 
     if (name.text.trim().length < 1) {
-      setName({ ...name, error: true, textError: "The category name is required" });
+      setName({ ...name, error: true, textError: "The company name is required" });
       return;
     }
 
-    let descNoTags = description.replace(/(<([^>]+)>)/gi, "");
-    if (descNoTags < 1) {
-      setDescError(true);
-      return;
-    }
+    let hasInvalidAddress = false;
 
-    const category = {
+    addresses.forEach(address => {
+      if(address.status_type_id === '') {
+        toast.warning('Please set Status of Address!', {
+          position: 'top-right',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+        hasInvalidAddress = true; // Set the flag to true if an invalid address is found
+        return;
+      }
+      if(address.address_type_id === '') {
+        toast.warning('Please set Status of Address!', {
+          position: 'top-right',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+        hasInvalidAddress = true
+        return;
+      }
+
+    })
+
+    if (hasInvalidAddress) {
+      return;
+    }  
+
+    const company = {
       data: {
-        type: "categories",
+        type: "companies",
         attributes: {
           name: name.text,
-          description,
+          organization,
+          addresses 
         },
+        selectedId: selectedId
       },
     };
+    
 
     try {
-      await CrudService.createCategory(category);
-      navigate("/examples-api/category-management", {
-        state: { value: true, text: "The category was sucesfully created" },
+      await CrudService.createCompany(company);
+      navigate("/company-management", {
+        state: { value: true, text: "The company was successfully created" },
       });
     } catch (err) {
       if (err.hasOwnProperty("errors")) {
@@ -86,20 +155,22 @@ const NewCategory = () => {
     }
   };
 
+  
   return (
     <DashboardLayout>
       <DashboardNavbar />
+      <ToastContainer/>
       <MDBox mt={5} mb={9}>
         <Grid container justifyContent="center">
           <Grid item xs={12} lg={8}>
             <MDBox mt={6} mb={8} textAlign="center">
               <MDBox mb={1}>
                 <MDTypography variant="h3" fontWeight="bold">
-                  Add New Category
+                  Add New Company
                 </MDTypography>
               </MDBox>
               <MDTypography variant="h5" fontWeight="regular" color="secondary">
-                This information will describe more about the category.
+                This information will describe more about the company.
               </MDTypography>
             </MDBox>
             <Card>
@@ -120,24 +191,24 @@ const NewCategory = () => {
                       </MDTypography>
                     )}
                   </MDBox>
-                  <MDBox mt={2}>
-                    <MDBox mb={1} ml={0.5} lineHeight={0} display="inline-block">
-                      <MDTypography
-                        component="label"
-                        variant="button"
-                        fontWeight="regular"
-                        color="text"
-                      >
-                        Description&nbsp;&nbsp;
-                      </MDTypography>
+                  <MDBox display="flex" flexDirection="column">
+                    <MDBox
+                      display="flex"
+                      flexDirection="column"
+                      marginBottom="1rem"
+                      marginTop="2rem"
+                    >
+                      <MDInput
+                        fullWidth
+                        label="Organization"
+                        inputProps={{ type: "text", autoComplete: ""  }}
+                        name="organization"
+                        value={organization}
+                        disabled={true}
+                      />
                     </MDBox>
-                    <MDEditor value={description} onChange={setDescription} />
-                    {descError && (
-                      <MDTypography variant="caption" color="error" fontWeight="light">
-                        The category description is required
-                      </MDTypography>
-                    )}
                   </MDBox>
+                  <ModalAddress addressTypes={addressTypes} statusOptions={statusOptions} addresses={addresses} setAddresses={setAddresses} selectedId={selectedId} setSelectedId={setSelectedId} />
                   <MDBox ml="auto" mt={4} mb={2} display="flex" justifyContent="flex-end">
                     <MDBox mx={2}>
                       <MDButton
@@ -147,7 +218,7 @@ const NewCategory = () => {
                         px={2}
                         mx={2}
                         onClick={() =>
-                          navigate("/examples-api/category-management", {
+                          navigate("/company-management", {
                             state: { value: false, text: "" },
                           })
                         }
@@ -170,4 +241,4 @@ const NewCategory = () => {
   );
 };
 
-export default NewCategory;
+export default NewCompany;

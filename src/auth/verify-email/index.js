@@ -40,8 +40,8 @@ function EmailVerification() {
   const authContext = useContext(AuthContext);
   const [rememberMe, setRememberMe] = useState(false);
   const [inputs, setInputs] = useState({
-    email: "admin@jsonapi.com",
-    password: "secret",
+    email: "",
+    password: "",
   });
   const [errors, setErrors] = useState({
     emailError: false,

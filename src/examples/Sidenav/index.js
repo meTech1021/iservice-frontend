@@ -54,6 +54,7 @@ import AuthService from "services/auth-service";
 import { Can } from "Can";
 
 function Sidenav({ color, brand, brandName, routes, ...rest }) {
+  const { setIsAuthenticated, getCurrentUser } = useContext(AuthContext);
   const authContext = useContext(AuthContext);
 
   const [openCollapse, setOpenCollapse] = useState(false);
@@ -104,7 +105,8 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
 
   const handleLogOut = async () => {
     try {
-      await AuthService.logout();
+      let user = await getCurrentUser();
+      await AuthService.logout(user);
       authContext.logout();
     } catch (err) {
       console.error(err);

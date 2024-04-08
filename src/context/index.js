@@ -57,7 +57,7 @@ const AuthContextProvider = ({ children }) => {
 
   useEffect(() => {
     if (!token) return;
-
+    console.log(token, 'token')
     navigate(location.pathname);
   }, [isAuthenticated]);
 
@@ -89,9 +89,7 @@ const AuthContextProvider = ({ children }) => {
     const id = await getCurrentUser();
     try {
       // second I get the user with role
-      console.log('________')
       const res = await CrudService.getUser(id);
-      console.log(res, '________')
       // const roleId = res.data.relationships.roles.data[0].id;
       const roleId = 1;
       // third check the role id and return the role type

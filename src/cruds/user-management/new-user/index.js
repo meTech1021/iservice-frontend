@@ -35,6 +35,7 @@ import FormField from "layouts/applications/wizard/components/FormField";
 import { useNavigate } from "react-router-dom";
 
 import CrudService from "services/cruds-service";
+import AuthService from "services/auth-service";
 
 const NewUser = () => {
   const navigate = useNavigate();
@@ -45,8 +46,10 @@ const NewUser = () => {
   const [user, setUser] = useState({
     name: "",
     email: "",
-    password: "",
-    confirm: "",
+    phone: "",
+    organization: "",
+    // password: "",
+    // confirm: "",
     role: "",
   });
 
@@ -55,8 +58,10 @@ const NewUser = () => {
   const [error, setError] = useState({
     name: false,
     email: false,
-    password: false,
-    confirm: false,
+    phone: false,
+    organization: false,
+    // password: false,
+    // confirm: false,
     role: false,
     error: false,
     textError: "",
@@ -71,6 +76,16 @@ const NewUser = () => {
         console.error(err);
         return null;
       }
+    })();
+    (async () => {
+      const response = await AuthService.getProfile();
+      setUser({
+        name: "",
+        email: "",
+        phone: "",
+        organization: response.data.attributes.Organization?.name,
+        role: "",
+      });
     })();
   }, []);
 
@@ -98,57 +113,82 @@ const NewUser = () => {
       setError({
         email: false,
         role: false,
-        confirm: false,
-        password: false,
+        phone: false,
+        organization: false,
+        // confirm: false,
+        // password: false,
         name: true,
         textError: "The name cannot be empty",
       });
       return;
     }
 
+    if (user.organization.trim().length === 0) {
+      setError({
+        email: false,
+        role: false,
+        phone: false,
+        organization: true,
+        // confirm: false,
+        // password: false,
+        name: false,
+        textError: "The organization cannot be empty",
+      });
+      return;
+    }
+
+
     if (user.email.trim().length === 0 || !user.email.trim().match(mailFormat)) {
       setError({
         role: false,
-        confirm: false,
-        password: false,
+        // confirm: false,
+        // password: false,
         name: false,
+        phone: false,
+        organization: false,    
         email: true,
         textError: "The email is not valid",
       });
       return;
     }
 
-    if (user.password.trim().length < 8) {
-      setError({
-        name: false,
-        email: false,
-        role: false,
-        confirm: false,
-        password: true,
-        textError: "The password should have at least 8 characters",
-      });
-      return;
-    }
+    // if (user.password.trim().length < 8) {
+    //   setError({
+    //     name: false,
+    //     email: false,
+    //     role: false,
+    //     // confirm: false,
+    //     // password: true,
+    //     phone: false,
+    //     organization: false,    
+    //     textError: "The password should have at least 8 characters",
+    //   });
+    //   return;
+    // }
 
-    if (user.confirm.trim() !== user.password.trim()) {
-      setError({
-        name: false,
-        email: false,
-        role: false,
-        password: false,
-        confirm: true,
-        textError: "The password and password confirmation do not match",
-      });
-      return;
-    }
+    // if (user.confirm.trim() !== user.password.trim()) {
+    //   setError({
+    //     name: false,
+    //     email: false,
+    //     role: false,
+    //     phone: false,
+    //     organization: false,    
+    //     // password: false,
+    //     // confirm: true,
+    //     textError: "The password and password confirmation do not match",
+    //   });
+    //   return;
+    // }
 
     if (value.id === "") {
       setError({
         name: false,
         email: false,
         role: false,
-        password: false,
-        confirm: false,
+        // password: false,
+        // confirm: false,
+        phone: false,
+        organization: false,    
         role: true,
         textError: "Role is required",
       });
@@ -161,15 +201,17 @@ const NewUser = () => {
         attributes: {
           name: user.name,
           email: user.email,
-          password: user.password,
-          password_confirmation: user.confirm,
-          profile_image: null,
+          phone: user.phone,
+          organization: user.organization,
+          // password: user.password,
+          // password_confirmation: user.confirm,
+          profile_image: '',
         },
         relationships: {
           roles: {
             data: [
               {
-                id: value.id.toString(),
+                id: value.id?.toString(),
                 type: "roles",
               },
             ],
@@ -186,34 +228,41 @@ const NewUser = () => {
       return null;
     }
     if (res) {
-      try {
-        const { url } = await CrudService.imageUpload(fileState, res.data.id);
-        const userData = {
-          data: {
-            type: "profile",
-            attributes: {
-              profile_image: `${process.env.REACT_APP_IMAGES}${url}`,
+      if(fileState)
+      {
+        try {
+          const { url } = await CrudService.imageUpload(fileState, res.data.id);
+          const userData = {
+            data: {
+              type: "profile",
+              attributes: {
+                profile_image: `${process.env.REACT_APP_IMAGES}${url}`,
+              },
             },
-          },
-        };
-        const toUpdateUser = {
-          data: {
-            id: res.data.id.toString(),
-            type: "users",
-            attributes: {
-              profile_image: fileState ? `${process.env.REACT_APP_IMAGES}${url}` : null,
+          };
+          const toUpdateUser = {
+            data: {
+              id: res.data.id?.toString(),
+              type: "users",
+              attributes: {
+                profile_image: fileState ? `${process.env.REACT_APP_IMAGES}${url}` : null,
+              },
             },
-          },
-        };
-        await CrudService.updateUser(toUpdateUser, res.data.id);
-        navigate("/examples-api/user-management", {
-          state: { value: true, text: "The user was sucesfully created" },
-        });
-      } catch (err) {
-        if (err.hasOwnProperty("errors")) {
-          setError({ ...error, error: true, textError: err.errors[0].detail });
+          };
+          await CrudService.updateUser(toUpdateUser, res.data.id);
+          navigate("/user-management", {
+            state: { value: true, text: "The user was successfully created" },
+          });
+        } catch (err) {
+          if (err.hasOwnProperty("errors")) {
+            setError({ ...error, error: true, textError: err.errors[0].detail });
+          }
+          return null;
         }
-        return null;
+      } else {
+        navigate("/user-management", {
+          state: { value: true, text: "The user was successfully created" },
+        });
       }
     }
   };
@@ -244,7 +293,8 @@ const NewUser = () => {
                 <MDBox display="flex" flexDirection="column" px={3} my={4}>
                   <Grid container spacing={3}>
                     <Grid item xs={12} sm={6}>
-                      <FormField
+                      <MDInput
+                        fullWidth
                         label="Name"
                         placeholder="Alec"
                         name="name"
@@ -265,7 +315,8 @@ const NewUser = () => {
                       )}
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                      <FormField
+                      <MDInput
+                        fullWidth
                         label="Email"
                         placeholder="example@email.com"
                         inputProps={{
@@ -288,6 +339,41 @@ const NewUser = () => {
                     </Grid>
                   </Grid>
                   <Grid container spacing={3} mt={4}>
+                    <Grid item xs={12} sm={6}>
+                      <MDInput
+                        fullWidth
+                        label="Phone"
+                        inputProps={{ type: "text", autoComplete: "" }}
+                        name="phone"
+                        value={user.phone}
+                        onChange={changeHandler}
+                        error={error.phone}
+                      />
+                      {error.phone && (
+                        <MDTypography variant="caption" color="error" fontWeight="light">
+                          {error.textError}
+                        </MDTypography>
+                      )}
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <MDInput
+                        fullWidth
+                        label="Organization"
+                        inputProps={{ type: "text", autoComplete: ""  }}
+                        name="organization"
+                        value={user.organization}
+                        onChange={changeHandler}
+                        error={error.organization}
+                        disabled={true}
+                      />
+                      {error.organization && (
+                        <MDTypography variant="caption" color="error" fontWeight="light">
+                          {error.textError}
+                        </MDTypography>
+                      )}
+                    </Grid>
+                  </Grid>
+                  {/* <Grid container spacing={3} mt={4}>
                     <Grid item xs={12} sm={6}>
                       <MDInput
                         fullWidth
@@ -320,7 +406,7 @@ const NewUser = () => {
                         </MDTypography>
                       )}
                     </Grid>
-                  </Grid>
+                  </Grid> */}
                   <MDBox display="flex" flexDirection="column" fullWidth>
                     <MDBox
                       display="flex"
@@ -393,7 +479,7 @@ const NewUser = () => {
                         px={2}
                         mx={2}
                         onClick={() =>
-                          navigate("/examples-api/user-management", {
+                          navigate("/user-management", {
                             state: { value: false, text: "" },
                           })
                         }

@@ -47,6 +47,8 @@ const EditUser = () => {
     id: "",
     name: "",
     email: "",
+    phone: "",
+    organization: "",
     role: "",
   });
   const [value, setValue] = useState({});
@@ -55,6 +57,8 @@ const EditUser = () => {
     name: false,
     email: false,
     role: false,
+    phone: false,
+    organization: false,
     error: false,
     textError: "",
   });
@@ -83,6 +87,8 @@ const EditUser = () => {
           id: getData.id,
           name: getData.attributes.name,
           email: getData.attributes.email,
+          phone: getData.attributes.phone,
+          organization: getData.attributes.Organization?.name,
           role: getData.relationships.roles.data[0].id,
         });
         setImage(getData.attributes.profile_image);
@@ -125,7 +131,23 @@ const EditUser = () => {
         email: false,
         role: false,
         name: true,
+        phone: false,
+        organization: false,
         textError: "The name cannot be empty",
+      });
+      return;
+    }
+
+    if (user.organization.trim().length === 0) {
+      setError({
+        email: false,
+        role: false,
+        phone: false,
+        organization: true,
+        confirm: false,
+        password: false,
+        name: false,
+        textError: "The organization cannot be empty",
       });
       return;
     }
@@ -135,6 +157,8 @@ const EditUser = () => {
         role: false,
         name: false,
         email: true,
+        phone: false,
+        organization: false,
         textError: "The email is not valid",
       });
       return;
@@ -148,6 +172,8 @@ const EditUser = () => {
         password: false,
         confirm: false,
         role: true,
+        phone: false,
+        organization: false,
         textError: "Role is required",
       });
       return;
@@ -164,6 +190,8 @@ const EditUser = () => {
           attributes: {
             name: user.name,
             email: user.email,
+            phone: user.phone,
+            organization: user.organization,  
             profile_image: fileState ? `${process.env.REACT_APP_IMAGES}${url}` : image,
           },
           relationships: {
@@ -181,8 +209,8 @@ const EditUser = () => {
 
       try {
         const res = await CrudService.updateUser(newUser, newUser.data.id);
-        navigate("/examples-api/user-management", {
-          state: { value: true, text: "The user was sucesfully updated" },
+        navigate("/user-management", {
+          state: { value: true, text: "The user was successfully updated" },
         });
       } catch (err) {
         if (err.hasOwnProperty("errors")) {
@@ -222,7 +250,8 @@ const EditUser = () => {
                 <MDBox display="flex" flexDirection="column" px={3} my={4}>
                   <Grid container spacing={3}>
                     <Grid item xs={12} sm={6}>
-                      <FormField
+                      <MDInput
+                        fullWidth
                         label="Name"
                         placeholder="Alec"
                         name="name"
@@ -237,7 +266,8 @@ const EditUser = () => {
                       )}
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                      <FormField
+                      <MDInput
+                        fullWidth
                         label="Email"
                         placeholder="example@email.com"
                         inputProps={{ type: "email" }}
@@ -247,6 +277,41 @@ const EditUser = () => {
                         error={error.email}
                       />
                       {error.email && (
+                        <MDTypography variant="caption" color="error" fontWeight="light">
+                          {error.textError}
+                        </MDTypography>
+                      )}
+                    </Grid>
+                  </Grid>
+                  <Grid container spacing={3} mt={4}>
+                    <Grid item xs={12} sm={6}>
+                      <MDInput
+                        fullWidth
+                        label="Phone"
+                        inputProps={{ type: "text", autoComplete: "" }}
+                        name="phone"
+                        value={user.phone}
+                        onChange={changeHandler}
+                        error={error.phone}
+                      />
+                      {error.phone && (
+                        <MDTypography variant="caption" color="error" fontWeight="light">
+                          {error.textError}
+                        </MDTypography>
+                      )}
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <MDInput
+                        fullWidth
+                        label="Organization"
+                        inputProps={{ type: "text", autoComplete: "" }}
+                        name="organization"
+                        value={user.organization}
+                        onChange={changeHandler}
+                        error={error.organization}
+                        disabled={true}
+                      />
+                      {error.organization && (
                         <MDTypography variant="caption" color="error" fontWeight="light">
                           {error.textError}
                         </MDTypography>
@@ -332,7 +397,7 @@ const EditUser = () => {
                         px={2}
                         mx={2}
                         onClick={() =>
-                          navigate("/examples-api/user-management", {
+                          navigate("/user-management", {
                             state: { value: false, text: "" },
                           })
                         }

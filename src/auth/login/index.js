@@ -40,8 +40,8 @@ function Login() {
   const authContext = useContext(AuthContext);
   const [rememberMe, setRememberMe] = useState(false);
   const [inputs, setInputs] = useState({
-    email: "admin@jsonapi.com",
-    password: "secret",
+    email: "",
+    password: "",
   });
   const [errors, setErrors] = useState({
     emailError: false,
@@ -85,7 +85,8 @@ function Login() {
 
     try {
       const response = await AuthService.login(myData);
-      authContext.login(response.access_token, response.refresh_token);
+      console.log(myData, response, 'response')
+      authContext.login(response.access_token);
     } catch (res) {
       if (res.hasOwnProperty("message")) {
         setErrors({ ...errors, credentialsErros: true, textError: res.message });

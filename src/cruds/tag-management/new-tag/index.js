@@ -66,8 +66,8 @@ const NewTag = () => {
 
     try {
       await CrudService.createTag(tag);
-      navigate("/examples-api/tag-management", {
-        state: { value: true, text: "The tag was sucesfully created" },
+      navigate("/tag-management", {
+        state: { value: true, text: "The tag was successfully created" },
       });
     } catch (err) {
       if (err.hasOwnProperty("errors")) {
@@ -134,7 +134,7 @@ const NewTag = () => {
                         px={2}
                         mx={2}
                         onClick={() =>
-                          navigate("/examples-api/tag-management", {
+                          navigate("/tag-management", {
                             state: { value: false, text: "" },
                           })
                         }

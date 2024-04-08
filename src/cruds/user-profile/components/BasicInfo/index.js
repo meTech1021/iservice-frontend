@@ -31,13 +31,15 @@ import FormField from "layouts/pages/account/components/FormField";
 import AuthService from "services/auth-service";
 
 function BasicInfo({ user, isDemo }) {
-  const [info, setInfo] = useState({ name: "", email: "" });
+  const [info, setInfo] = useState({ name: "", email: "", phone: "", organization: "" });
   const [notification, setNotification] = useState({ value: false, color: "info", message: "" });
 
   useEffect(() => {
     setInfo({
       name: user.name,
       email: user.email,
+      phone: user.phone,
+      organization: user.organization,
     });
   }, [user]);
 
@@ -52,6 +54,8 @@ function BasicInfo({ user, isDemo }) {
   const [errors, setErrors] = useState({
     nameError: false,
     emailError: false,
+    phoneError: false,
+    orgError: false,
   });
 
   const changeHandler = (e) => {
@@ -96,6 +100,8 @@ function BasicInfo({ user, isDemo }) {
           attributes: {
             name: info.name,
             email: info.email,
+            phone: info.phone,
+            organization: info.organization,
             profile_image: user.profile_image ?? null,
           },
         },
@@ -130,7 +136,7 @@ function BasicInfo({ user, isDemo }) {
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6}>
               <FormField
-                label="First Name"
+                label="Name"
                 placeholder="Alec"
                 name="name"
                 value={info.name}
@@ -147,6 +153,29 @@ function BasicInfo({ user, isDemo }) {
                 value={info.email}
                 onChange={changeHandler}
                 error={errors.emailError}
+              />
+            </Grid>
+          </Grid>
+          <Grid container spacing={3}  sx={{ marginTop: '20px' }}>
+            <Grid item xs={12} sm={6}>
+              <FormField
+                label="Phone"
+                placeholder=""
+                name="phone"
+                value={info.phone}
+                onChange={changeHandler}
+                error={errors.phoneError}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormField
+                label="Organization"
+                placeholder=""
+                name="organization"
+                value={info.organization}
+                onChange={changeHandler}
+                error={errors.orgError}
+                disabled={true}
               />
             </Grid>
           </Grid>

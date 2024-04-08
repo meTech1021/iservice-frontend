@@ -12,7 +12,7 @@ const VerifyEmailPage = () => {
       try {
         const response = await AuthService.verifyEmail(token);
         authContext.login(response.access_token);
-        window.location.href = 'http://localhost:3000';
+        window.location.href = process.env.REACT_APP_IS_DEMO;
       } catch (error) {
         // Handle errors
         console.error('Error:', error);

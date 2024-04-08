@@ -83,8 +83,8 @@ const EditRole = () => {
 
     try {
       await CrudService.updateRole(role, role.data.id);
-      navigate("/examples-api/role-management", {
-        state: { value: true, text: "The role was sucesfully udpated" },
+      navigate("/role-management", {
+        state: { value: true, text: "The role was successfully udpated" },
       });
     } catch (err) {
       if (err.hasOwnProperty("errors")) {
@@ -137,7 +137,7 @@ const EditRole = () => {
                         px={2}
                         mx={2}
                         onClick={() =>
-                          navigate("/examples-api/role-management", {
+                          navigate("/role-management", {
                             state: { value: false, text: "" },
                           })
                         }

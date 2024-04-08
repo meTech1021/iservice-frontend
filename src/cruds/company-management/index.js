@@ -15,7 +15,7 @@ Coded by www.creative-tim.com
 
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-
+import { Modal } from '@mui/material';
 // @mui material components
 import Card from "@mui/material/Card";
 
@@ -39,12 +39,16 @@ import CrudService from "services/cruds-service";
 import HTMLReactParser from "html-react-parser";
 import { AbilityContext } from "Can";
 import { useAbility } from "@casl/react";
+import GoogleMapComponent from "examples/Maps";
 
-function CategoryManagement() {
+function CompanyManagement() {
   let { state } = useLocation();
   const ability = useAbility(AbilityContext);
   const [data, setData] = useState([]);
   const [tableData, setTableData] = useState([]);
+  const [openModal, setOpenModal] = useState(false);
+  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
   const [notification, setNotification] = useState({
     value: false,
     text: "",
@@ -54,9 +58,11 @@ function CategoryManagement() {
 
   useEffect(() => {
     (async () => {
-      const response = await CrudService.getCategories();
+      const response = await CrudService.getCompanies();
+
       setData(response.data);
     })();
+    document.title = `RIVIO | Companies`;
   }, []);
 
   useEffect(() => {
@@ -83,49 +89,68 @@ function CategoryManagement() {
   }, [notification]);
 
   const clickAddHandler = () => {
-    navigate("/category-management/new-category");
+    navigate("/company-management/new-company");
   };
 
   const clickEditHandler = (id) => {
-    navigate(`/category-management/edit-category/${id}`);
+    navigate(`/company-management/edit-company/${id}`);
   };
 
   const clickDeleteHandler = async (e, id) => {
     try {
-      if (!confirm("Are you sure you want to delete this category?")) {
+      if (!confirm("Are you sure you want to delete this company?")) {
         e.nativeEvent.stopImmediatePropagation();
       } else {
-        await CrudService.deleteCategory(id);
+        await CrudService.deleteCompany(id);
         // the delete does not send a response
-        // so I need to get again the categories to set it and this way the table gets updated -> it goes to the useEffect with data dependecy
-        const response = await CrudService.getCategories();
+        // so I need to get again the companies to set it and this way the table gets updated -> it goes to the useEffect with data dependecy
+        const response = await CrudService.getCompanies();
         setData(response.data);
         setNotification({
           value: true,
-          text: "The category has been successfully deleted",
+          text: "The company has been successfully deleted",
         });
       }
     } catch (err) {
-      // it sends error is the category is associated with an item
+      // it sends error is the company is associated with an item
       console.error(err);
+      console.log(err.errors[0].detail, 'error')
       if (err.hasOwnProperty("errors")) {
         setNotification({
           value: true,
-          text: err.errors[0].title,
+          text: err.errors[0].detail,
         });
       }
       return null;
     }
   };
 
+
+  const handleMapButtonClick = (row) => {
+    const { street_address1, street_address2, city, state, country, postal_code, latitude, longitude } = row;
+  
+    setLatitude(latitude);
+    setLongitude(longitude);
+    // setMapUrl(url);
+    setOpenModal(true);
+  };
+    
   const getRows = (info) => {
+
     let updatedInfo = info.map((row) => {
+      const defaultIndex = row.moduleLocations.findIndex(location => location.is_default === true)
       return {
-        type: "categories",
-        id: row.id,
+        type: "companies",
+        id: row.attributes.company_id,
         name: row.attributes.name,
-        description: row.attributes.description,
-        created_at: row.attributes.created_at,
+        organization: row.attributes.Organization?.name,
+        address: row.moduleLocations[defaultIndex]?.Address?.street_address1,
+        city: row.moduleLocations[defaultIndex]?.Address?.city,
+        state: row.moduleLocations[defaultIndex]?.Address?.state,
+        country: row.moduleLocations[defaultIndex]?.Address?.country,
+        postal_code: row.moduleLocations[defaultIndex]?.Address?.postal_code,
+        latitude: row.moduleLocations[defaultIndex]?.Address?.latitude,
+        longitude: row.moduleLocations[defaultIndex]?.Address?.longitude,
       };
     });
     return updatedInfo;
@@ -133,14 +158,27 @@ function CategoryManagement() {
 
   const dataTableData = {
     columns: [
-      { Header: "name", accessor: "name", width: "25%" },
+      { Header: "name", accessor: "name", width: "20%" },
       {
-        Header: "description",
-        accessor: "description",
-        width: "25%",
-        Cell: ({ cell: { value } }) => HTMLReactParser(value),
+        Header: "Organization",
+        accessor: "organization",
+        width: "10%",
       },
-      { Header: "created at", accessor: "created_at", width: "25%" },
+      { Header: "Address 1", accessor: "address", width: "10%" },
+      { Header: "City", accessor: "city", width: "20%" },
+      { Header: "State", accessor: "state", width: "10%" },
+      { Header: "Country", accessor: "country", width: "10%" },
+      { Header: "Postal Code", accessor: "postal_code", width: "10%" },
+      { Header: "Latitude", accessor: "latitude", width: "10%" },
+      { Header: "Longitude", accessor: "longitude", width: "10%" },
+      {
+        Header: "View on Map",
+        accessor: "",
+        width: "10%",
+        Cell: (info) => (
+          <MDButton onClick={() => handleMapButtonClick(info.cell.row.original)}>View</MDButton>
+        ),
+      },
       {
         Header: "actions",
         disableSortBy: true,
@@ -148,17 +186,17 @@ function CategoryManagement() {
         Cell: (info) => {
           return (
             <MDBox display="flex" alignItems="center">
-              {ability.can("delete", "categories") && (
-                <Tooltip title="Delete Category">
-                  <IconButton onClick={(e) => clickDeleteHandler(e, info.cell.row.original.id)}>
-                    <DeleteIcon />
+              {ability.can("edit", "companies") && (
+                <Tooltip title="Edit Company">
+                  <IconButton onClick={() => clickEditHandler(info.cell.row.original.id)}>
+                    <EditIcon />
                   </IconButton>
                 </Tooltip>
               )}
-              {ability.can("edit", "categories") && (
-                <Tooltip title="Edit Category">
-                  <IconButton onClick={() => clickEditHandler(info.cell.row.original.id)}>
-                    <EditIcon />
+              {ability.can("delete", "companies") && (
+                <Tooltip title="Delete Company">
+                  <IconButton onClick={(e) => clickDeleteHandler(e, info.cell.row.original.id)}>
+                    <DeleteIcon />
                   </IconButton>
                 </Tooltip>
               )}
@@ -186,9 +224,14 @@ function CategoryManagement() {
           <Card>
             <MDBox p={3} lineHeight={1} display="flex" justifyContent="space-between">
               <MDTypography variant="h5" fontWeight="medium">
-                Category Management
+                Company Management
               </MDTypography>
-              {ability.can("create", "categories") && (
+              <Modal open={openModal} onClose={() => setOpenModal(false)}>
+                <MDBox tabIndex={-1}>
+                  <GoogleMapComponent lat={latitude} lng={longitude} />
+                </MDBox>
+              </Modal>
+              {ability.can("create", "companies") && (
                 <MDButton
                   variant="gradient"
                   color="dark"
@@ -196,11 +239,11 @@ function CategoryManagement() {
                   type="submit"
                   onClick={clickAddHandler}
                 >
-                  + Add Category
+                  + Add Company
                 </MDButton>
               )}
             </MDBox>
-            <DataTable table={dataTableData} />
+            <DataTable table={dataTableData} canSearch={true} />
           </Card>
         </MDBox>
       </MDBox>
@@ -209,4 +252,4 @@ function CategoryManagement() {
   );
 }
 
-export default CategoryManagement;
+export default CompanyManagement;

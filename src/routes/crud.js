@@ -13,9 +13,9 @@ Coded by www.creative-tim.com
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
 
-import EditCategory from "cruds/category-management/edit-category";
-import NewCategory from "cruds/category-management/new-category";
 import EditItem from "cruds/item-management/edit-item";
+import NewCompany from "cruds/company-management/new-company";
+import NewEntity from "cruds/entity-management/new-entity";
 import NewItem from "cruds/item-management/new-item";
 import EditRole from "cruds/role-managament/edit-role";
 import NewRole from "cruds/role-managament/new-role";
@@ -23,6 +23,17 @@ import EditTag from "cruds/tag-management/edit-tag";
 import NewTag from "cruds/tag-management/new-tag";
 import EditUser from "cruds/user-management/edit-user";
 import NewUser from "cruds/user-management/new-user";
+import EditCompany from "cruds/company-management/edit-company";
+import EditEntity from "cruds/entity-management/edit-entity";
+import NewDevice from "cruds/device-management/internal-device-management/new-device";
+import EditDevice from "cruds/device-management/internal-device-management/edit-device";
+import ViewEntity from "cruds/entity-management/view-entity";
+import NewContact from "cruds/contact-management/new-contact";
+import EditContact from "cruds/contact-management/edit-contact";
+import NewAPI from "cruds/api-management/new-api";
+import EditAPI from "cruds/api-management/edit-api";
+import NewMonitorDevice from "cruds/device-management/monitor-management/new-monitor";
+import EditMonitorDevice from "cruds/device-management/monitor-management/edit-monitor";
 
 /** 
   All of the routes for the Material Dashboard 2 PRO React are added here,
@@ -50,16 +61,34 @@ import NewUser from "cruds/user-management/new-user";
 
 const crudRoutes = [
   {
-    key: "new-category",
-    route: "/category-management/new-category",
-    component: <NewCategory />,
-    type: "cateogories",
+    key: "new-company",
+    route: "/company-management/new-company",
+    component: <NewCompany />,
+    type: "companies",
   },
   {
-    key: "edit-category",
-    route: "/category-management/edit-category/:id",
-    component: <EditCategory />,
-    type: "cateogories",
+    key: "edit-company",
+    route: "/company-management/edit-company/:id",
+    component: <EditCompany />,
+    type: "companies",
+  },
+  {
+    key: "view-entity",
+    route: "/entity-management/view-entity/:id",
+    component: <ViewEntity />,
+    type: "entities",
+  },
+  {
+    key: "new-entity",
+    route: "/entity-management/new-entity",
+    component: <NewEntity />,
+    type: "entities",
+  },
+  {
+    key: "edit-entity",
+    route: "/entity-management/edit-entity/:id",
+    component: <EditEntity />,
+    type: "entities",
   },
   {
     key: "new-tag",
@@ -109,6 +138,54 @@ const crudRoutes = [
     component: <EditItem />,
     type: "items",
   },
+  {
+    key: "new-device",
+    route: "/internal-device-management/new-device",
+    component: <NewDevice />,
+    type: "devices",
+  },
+  {
+    key: "edit-device",
+    route: "/internal-device-management/edit-device/:id",
+    component: <EditDevice />,
+    type: "devices",
+  },
+  {
+    key: "new-monitor",
+    route: "/monitor-management/new-monitor",
+    component: <NewMonitorDevice />,
+    type: "monitors",
+  },
+  {
+    key: "edit-monitor",
+    route: "/monitor-management/edit-monitor/:id",
+    component: <EditMonitorDevice />,
+    type: "monitors",
+  },
+  {
+    key: "new-contact",
+    route: "/contact-management/new-contact",
+    component: <NewContact />,
+    type: "contacts",
+  },
+  {
+    key: "edit-contact",
+    route: "/contact-management/edit-contact/:id",
+    component: <EditContact />,
+    type: "contacts",
+  },
+  {
+    key: "new-api",
+    route: "/api-management/new-api",
+    component: <NewAPI />,
+    type: "apis",
+  },
+  {
+    key: "edit-api",
+    route: "/api-management/edit-api/:id",
+    component: <EditAPI />,
+    type: "apis",
+  }
 ];
 
 export default crudRoutes;

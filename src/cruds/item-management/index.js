@@ -14,9 +14,12 @@ Coded by www.creative-tim.com
 */
 
 import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 // @mui material components
 import Card from "@mui/material/Card";
+import Badge from "@mui/material/Badge";
+import Modal from "@mui/material/Modal";
 
 // Material Dashboard 2 PRO React components
 import MDBox from "components/MDBox";
@@ -28,7 +31,6 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import DataTable from "examples/Tables/DataTable";
 import MDButton from "components/MDButton";
-import MDAvatar from "components/MDAvatar";
 import MDAlert from "components/MDAlert";
 import { Tooltip, IconButton } from "@mui/material";
 
@@ -36,42 +38,43 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 
 import CrudService from "services/cruds-service";
-import HttpService from "services/http.service";
-import { useNavigate } from "react-router-dom";
+import HTMLReactParser from "html-react-parser";
 import { AbilityContext } from "Can";
 import { useAbility } from "@casl/react";
 
 function ItemManagement() {
-  const [items, setItems] = useState([]);
+  let { state } = useLocation();
   const ability = useAbility(AbilityContext);
-  const [updated, setUpdated] = useState(false);
+  const [data, setData] = useState([]);
   const [tableData, setTableData] = useState([]);
   const [notification, setNotification] = useState({
     value: false,
     text: "",
   });
+  const [openModal, setOpenModal] = useState(false);
+  const [mapUrl, setMapUrl] = useState('');
 
   const navigate = useNavigate();
 
-  const getCategory = async (item) => {
-    try {
-      return await HttpService.get(item.relationships.category.links.related);
-    } catch (err) {
-      // throw new Error(err);
-      console.error(err);
-      return null;
-    }
-  };
+  useEffect(() => {
+    (async () => {
+      const response = await CrudService.getItems();
+      setData(response.data);
+    })();
+    document.title = `RIVIO | Items`;
+  }, []);
 
-  const getTags = async (item) => {
-    try {
-      return await HttpService.get(item.relationships.tags.links.related);
-    } catch (err) {
-      // throw new error
-      console.error(err);
-      return null;
-    }
-  };
+  useEffect(() => {
+    if (!state) return;
+    setNotification({
+      value: state.value,
+      text: state.text,
+    });
+  }, [state]);
+
+  useEffect(() => {
+    setTableData(getRows(data));
+  }, [data]);
 
   useEffect(() => {
     if (notification.value === true) {
@@ -99,114 +102,84 @@ function ItemManagement() {
       } else {
         await CrudService.deleteItem(id);
         // the delete does not send a response
-        // so I need to get again the tags to set it and this way the table gets updated -> it goes to the useEffect with data dependecy
-        setUpdated((prevState) => !prevState);
+        // so I need to get again the categories to set it and this way the table gets updated -> it goes to the useEffect with data dependecy
+        const response = await CrudService.getItems();
+        setData(response.data);
         setNotification({
           value: true,
           text: "The item has been successfully deleted",
         });
       }
     } catch (err) {
-      // it sends error is the category is associated with an item
+      // it sends error is the item is associated with an item
       console.error(err);
       if (err.hasOwnProperty("errors")) {
         setNotification({
           value: true,
-          text: err.errors[0].title,
+          text: err.errors[0].detail,
         });
       }
       return null;
     }
   };
 
-  useEffect(() => {
-    (async () => {
-      const response = await CrudService.getItems();
-      const myData = response.data;
-
-      const categories = await Promise.all(myData.map((item) => getCategory(item)));
-      const tags = await Promise.all(myData.map((item) => getTags(item)));
-
-      const toSetTags = [];
-      for (let i = 0; i < tags.length; i++) {
-        const element = tags[i].data.map((tag) => {
-          return {
-            key: `${i}-${tag.id}`,
-            name: tag.attributes.name,
-            color: tag.attributes.color,
-          };
-        });
-        toSetTags.push(element);
-      }
-
-      let newItems = new Array();
-      for (let i = 0; i < myData.length; i++) {
-        // if null it means it throwed an error so should jump it
-        if (categories[i] !== null && toSetTags[i] !== null) {
-          const item = {
-            id: myData[i].id,
-            category: categories[i].data.attributes.name,
-            image: myData[i].attributes.image,
-            name: myData[i].attributes.name,
-            created_at: myData[i].attributes.created_at,
-            tags: toSetTags[i],
-          };
-          newItems.push(item);
-        }
-      }
-
-      setItems(newItems);
-      setTableData(newItems);
-    })();
-  }, [updated]);
+  const getRows = (info) => {
+    let updatedInfo = info.map((row) => {
+      return {
+        type: "items",
+        id: row.id,
+        name: row.attributes.name,
+        company: row.attributes.Company?.name,
+        description: row.attributes.description,
+        type: row.attributes.ItemType?.type_name,
+        status: (
+          <Badge
+            color={row.attributes?.StatusOption?.BadgeDetail?.color || 'primary'}
+            variant={row.attributes?.StatusOption?.BadgeDetail?.variant}
+            badgeContent={row.attributes?.StatusOption?.StatusType?.status_name}
+            style={{marginLeft: '30px'}}
+          >
+          </Badge>
+        ),
+        // address: row.entityAddressItems[defaultIndex]?.Address?.street_address1,
+        // city: row.entityAddressItems[defaultIndex]?.Address?.city,
+        // state: row.entityAddressItems[defaultIndex]?.Address?.state,
+        // country: row.entityAddressItems[defaultIndex]?.Address?.country,
+        // postal_code: row.entityAddressItems[defaultIndex]?.Address?.postal_code,
+        // latitude: row.entityAddressItems[defaultIndex]?.Address?.latitude,
+        // longitude: row.entityAddressItems[defaultIndex]?.Address?.longitude,
+      };
+    });
+    return updatedInfo;
+  };
 
   const dataTableData = {
     columns: [
-      { Header: "name", accessor: "name", width: "15%" },
+      { Header: "Status", accessor: "status", width: "15%" },
+      { Header: "Name", accessor: "name", width: "25%" },
       {
-        Header: "image",
-        accessor: "image",
-        width: "15%",
-        disableSortBy: true,
-        Cell: ({ cell: { value } }) => {
-          return (
-            <>
-              <MDAvatar src={value} alt="profile-image" size="xl" shadow="sm" />
-            </>
-          );
-        },
+        Header: "Description",
+        accessor: "description",
+        width: "25%",
+        Cell: ({ cell: { value } }) => HTMLReactParser(value),
       },
-      { Header: "category", accessor: "category", width: "15%" },
-      {
-        Header: "tags",
-        accessor: "tags",
-        width: "20%",
-        Cell: ({ cell: { value } }) => {
-          return (
-            <>
-              {value.map((tag) => {
-                return (
-                  <MDBox
-                    display="flex"
-                    flexDirection="row"
-                    flexWrap={true}
-                    sx={{ backgroundColor: tag.color, borderRadius: 16 }}
-                    px={2}
-                    mt={0.5}
-                    py={0.5}
-                    key={tag.key}
-                  >
-                    <MDTypography variant="caption" color="white" width="100%" textAlign="center">
-                      {tag.name}
-                    </MDTypography>
-                  </MDBox>
-                );
-              })}
-            </>
-          );
-        },
-      },
-      { Header: "created at", accessor: "created_at", width: "15%" },
+      { Header: "Company", accessor: "company", width: "20%" },
+      { Header: "Type", accessor: "type", width: "20%" },
+      // { Header: "Address 1", accessor: "address", width: "10%" },
+      // { Header: "City", accessor: "city", width: "20%" },
+      // { Header: "State", accessor: "state", width: "10%" },
+      // { Header: "Country", accessor: "country", width: "10%" },
+      // { Header: "Postal Code", accessor: "postal_code", width: "10%" },
+      // { Header: "Latitude", accessor: "latitude", width: "10%" },
+      // { Header: "Longitude", accessor: "longitude", width: "10%" },
+      // {
+      //   Header: "View on Map",
+      //   accessor: "",
+      //   width: "10%",
+      //   Cell: (info) => (
+      //     <MDButton onClick={() => handleMapButtonClick(info.cell.row.original)}>View</MDButton>
+      //   ),
+      // },
       {
         Header: "actions",
         disableSortBy: true,
@@ -214,23 +187,17 @@ function ItemManagement() {
         Cell: (info) => {
           return (
             <MDBox display="flex" alignItems="center">
-              {ability.can("delete", "items") && (
-                <Tooltip
-                  title="Delete Item"
-                  onClick={(e) => clickDeleteHandler(e, info.cell.row.original.id)}
-                >
-                  <IconButton>
-                    <DeleteIcon />
+              {ability.can("edit", "items") && (
+                <Tooltip title="Edit Item">
+                  <IconButton onClick={() => clickEditHandler(info.cell.row.original.id)}>
+                    <EditIcon />
                   </IconButton>
                 </Tooltip>
               )}
-              {ability.can("edit", "items") && (
-                <Tooltip
-                  title="Edit Item"
-                  onClick={() => clickEditHandler(info.cell.row.original.id)}
-                >
-                  <IconButton>
-                    <EditIcon />
+              {ability.can("delete", "items") && (
+                <Tooltip title="Delete Item">
+                  <IconButton onClick={(e) => clickDeleteHandler(e, info.cell.row.original.id)}>
+                    <DeleteIcon />
                   </IconButton>
                 </Tooltip>
               )}
@@ -238,7 +205,6 @@ function ItemManagement() {
           );
         },
       },
-      ,
     ],
 
     rows: tableData,
@@ -261,6 +227,21 @@ function ItemManagement() {
               <MDTypography variant="h5" fontWeight="medium">
                 Item Management
               </MDTypography>
+              <Modal open={openModal} onClose={() => setOpenModal(false)}>
+                <div>
+                  <iframe
+                    id="mapIframe"
+                    width="100%"
+                    height="450"
+                    style={{ border: 0 }}
+                    loading="lazy"
+                    allowFullScreen
+                    src={mapUrl}
+                  ></iframe>
+                </div>
+                {/* <MapComponent location={location} /> */}
+              </Modal>
+
               {ability.can("create", "items") && (
                 <MDButton
                   variant="gradient"

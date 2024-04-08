@@ -16,9 +16,9 @@ class AuthService {
     return await HttpService.get(verifyEmailEndpoint);
   };
   
-  logout = async () => {
+  logout = async (payload) => {
     const logoutEndpoint = "logout";
-    return await HttpService.post(logoutEndpoint);
+    return await HttpService.post(logoutEndpoint, payload);
   };
 
   forgotPassword = async (payload) => {
@@ -32,7 +32,7 @@ class AuthService {
   };
 
   getProfile = async () => {
-    const getProfile = "me";
+    const getProfile = "me?include=Role";
     return await HttpService.get(getProfile);
   };
 

@@ -66,6 +66,7 @@ function UserManagement() {
       setRoles(response.included);
       setIsDemo(process.env.REACT_APP_IS_DEMO === "true");
     })();
+    document.title = `RIVIO | Users`;
   }, []);
 
   useEffect(() => {
@@ -78,6 +79,7 @@ function UserManagement() {
 
   useEffect(() => {
     setTableData(getRows(user));
+    console.log(getRows(user), 'tableData')
   }, [user]);
 
   useEffect(() => {
@@ -129,18 +131,22 @@ function UserManagement() {
 
   const getRows = (info) => {
     let updatedInfo = info.map((row) => {
-      let roleId = row.relationships.roles.data[0].id;
-      let roleName = roles.find((role) => role.id == roleId);
+      let roleId = row.attributes.Role?.id;
+      let roleName = row.attributes.Role?.name;
       return {
         type: "users",
         id: row.id,
         image: row.attributes.profile_image,
         name: row.attributes.name,
         email: row.attributes.email,
-        role: roleName.attributes.name,
+        phone: row.attributes.phone,
+        is_verified: row.attributes.is_verified,
+        organization: row.attributes.Organization?.name,
+        role: roleName,
         created_at: row.attributes.created_at,
       };
     });
+    console.log(updatedInfo, 'row.attributes')
     return updatedInfo;
   };
 
@@ -149,7 +155,7 @@ function UserManagement() {
       {
         Header: "image",
         accessor: "image",
-        width: "15%",
+        width: "10%",
         disableSortBy: true,
         Cell: ({ cell: { value } }) => {
           return (
@@ -160,8 +166,15 @@ function UserManagement() {
         },
       },
       { Header: "name", accessor: "name", width: "15%" },
-      { Header: "email", accessor: "email", width: "20%" },
+      { Header: "email", accessor: "email", width: "10%" },
+      { Header: "phone", accessor: "phone", width: "10%" },
+      { Header: "organization", accessor: "organization", width: "10%" },
       { Header: "role", accessor: "role", width: "15%" },
+      { Header: "Verified", accessor: "is_verified", width: "15%",
+        Cell: ({ cell: { value } }) => {
+          return value ? "Yes" : "No"; // Convert boolean value to string representation
+        }
+      },
       { Header: "created at", accessor: "created_at", width: "15%" },
       {
         Header: "actions",
@@ -170,36 +183,8 @@ function UserManagement() {
         Cell: (info) => {
           return (
             <MDBox display="flex" alignItems="center">
-              <Can I="delete" this={subject("users", info.cell.row.original)}>
-                {isDemo ? (
-                  getId(info.cell.row.original.id) !== 1 &&
-                  getId(info.cell.row.original.id) !== 2 &&
-                  getId(info.cell.row.original.id) !== 3 && (
-                    <Tooltip
-                      title="Delete User"
-                      onClick={(e) => clickDeleteHandler(e, info.cell.row.original.id)}
-                    >
-                      <IconButton>
-                        <DeleteIcon />
-                      </IconButton>
-                    </Tooltip>
-                  )
-                ) : (
-                  <Tooltip
-                    title="Delete User"
-                    onClick={(e) => clickDeleteHandler(e, info.cell.row.original.id)}
-                  >
-                    <IconButton>
-                      <DeleteIcon />
-                    </IconButton>
-                  </Tooltip>
-                )}
-              </Can>
               <Can I="edit" this={subject("users", info.cell.row.original)}>
-                {isDemo ? (
-                  info.cell.row.original.id !== "1" &&
-                  info.cell.row.original.id !== "2" &&
-                  info.cell.row.original.id !== "3" && (
+                {isDemo ? ((
                     <Tooltip
                       title="Edit User"
                       onClick={() => clickEditHandler(info.cell.row.original.id)}
@@ -218,6 +203,28 @@ function UserManagement() {
                       <EditIcon />
                     </IconButton>
                   </Tooltip>
+                )}
+              </Can>
+              <Can I="delete" this={subject("users", info.cell.row.original)}>
+                {isDemo ? ((
+                  <Tooltip
+                    title="Delete User"
+                    onClick={(e) => clickDeleteHandler(e, info.cell.row.original.id)}
+                  >
+                    <IconButton>
+                      <DeleteIcon />
+                    </IconButton>
+                  </Tooltip>
+                )
+                ) : (
+                    <Tooltip
+                      title="Delete User"
+                      onClick={(e) => clickDeleteHandler(e, info.cell.row.original.id)}
+                    >
+                      <IconButton>
+                        <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
                 )}
               </Can>
             </MDBox>
@@ -259,7 +266,7 @@ function UserManagement() {
                 </MDButton>
               )}
             </MDBox>
-            <DataTable table={dataTableData} />
+            <DataTable table={dataTableData} canSearch={true} />
           </Card>
         </MDBox>
       </MDBox>

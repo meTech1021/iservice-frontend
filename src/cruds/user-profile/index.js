@@ -38,6 +38,8 @@ function UserProfile() {
     id: "",
     name: "",
     email: "",
+    phone: "",
+    organization: "",
     password: "",
     newPassword: "",
     currentPassword: "",
@@ -48,14 +50,18 @@ function UserProfile() {
   useEffect(() => {
     (async () => {
       const response = await AuthService.getProfile();
-      // if (getId(response.data.id) == 1 || getId(response.data.id) == 2 || getId(response.data.id) == 3) {
+      console.log(response.data, 'response.data')
+      // if ((response.data.id) == 1 || (response.data.id) == 2 || (response.data.id) == 3) {
       //   setIsDemo(process.env.REACT_APP_IS_DEMO === "true");
       // }
+      console.log(response.data, 'response')
       setUser((prevUser) => ({
         ...prevUser,
         id: response.data.id,
         name: response.data.attributes.name,
         email: response.data.attributes.email,
+        phone: response.data.attributes.phone,
+        organization: response.data.attributes.Organization?.name,
         profile_image: response.data.attributes.profile_image,
         currentPassword: "",
         newPassword: "",

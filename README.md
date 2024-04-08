@@ -96,15 +96,15 @@ Let us know your thoughts below. And good luck with development!
 
 | Profile Page                                                                                                                                           | User Management                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [<img src="public/images/profile.png" width="490"/>](https://material-dashboard-pro-react-nodejs.creative-tim.com/examples-api/user-profile) | [<img src="public/images/user-management.png"  width="476"/>](https://material-dashboard-pro-react-nodejs.creative-tim.com/examples-api/user-management) |
+| [<img src="public/images/profile.png" width="490"/>](https://material-dashboard-pro-react-nodejs.creative-tim.com/user-profile) | [<img src="public/images/user-management.png"  width="476"/>](https://material-dashboard-pro-react-nodejs.creative-tim.com/user-management) |
 
 | Role Management                                                                                                                                                   | Item Management                                                                                                                                                   |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [<img src="public/images/role-management.png" width="483"/>](https://material-dashboard-pro-react-nodejs.creative-tim.com/examples-api/role-management) | [<img src="public/images/item-management.png" width="483"/>](https://material-dashboard-pro-react-nodejs.creative-tim.com/examples-api/item-management) |
+| [<img src="public/images/role-management.png" width="483"/>](https://material-dashboard-pro-react-nodejs.creative-tim.com/role-management) | [<img src="public/images/item-management.png" width="483"/>](https://material-dashboard-pro-react-nodejs.creative-tim.com/item-management) |
 
 | Category Management                                                                                                                                                       | Tag Management                                                                                                                                                  |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [<img src="public/images/category-management.png" width="483"/>](https://material-dashboard-pro-react-nodejs.creative-tim.com/examples-api/category-management) | [<img src="public/images/tag-management.png" width="483"/>](https://material-dashboard-pro-react-nodejs.creative-tim.com/examples-api/tag-management) |
+| [<img src="public/images/category-management.png" width="483"/>](https://material-dashboard-pro-react-nodejs.creative-tim.com/category-management) | [<img src="public/images/tag-management.png" width="483"/>](https://material-dashboard-pro-react-nodejs.creative-tim.com/tag-management) |
 
 [View More](https://material-dashboard-pro-react-nodejs.creative-tim.com/dashboards/analytics).
 
@@ -229,7 +229,7 @@ In the **/src/auth/reset-password/index.js** is the logic for resetting the pass
 
 ## User Profile
 
-From the sidenav, in the CRUDs section, or by adding **/examples-api/user-profile** in the url, the User Profile is a dynamic page where the user can add details about him: profile image, name, email or change password. Validation is added for every input.
+From the sidenav, in the CRUDs section, or by adding **/user-profile** in the url, the User Profile is a dynamic page where the user can add details about him: profile image, name, email or change password. Validation is added for every input.
 
 In the **/src/services/auth-serivce** you can find the routes sets for the request and in the **/src/cruds/user-profile** is the component for the editing the profile details.
 
@@ -319,8 +319,8 @@ In the **/src/cruds/tag-management/new-tag** is the logic for creating a tag:
 ```
     try {
       await CrudService.createTag(tag);
-      navigate("/examples-api/tag-management", {
-        state: { value: true, text: "The tag was sucesfully created" },
+      navigate("/tag-management", {
+        state: { value: true, text: "The tag was successfully created" },
       });
     } catch (err) {
       if (err.hasOwnProperty("errors")) {

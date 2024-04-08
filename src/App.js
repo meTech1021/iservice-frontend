@@ -149,8 +149,8 @@ export default function App({ ability }) {
         name: response.data.attributes.name,
         image: response.data.attributes.profile_image,
       });
-      // const rules = await getPermissions(id);
-      // ability.update(rules);
+      const rules = await getPermissions(id);
+      ability.update(rules);
     })();
   }, [authContext.isAuthenticated]);
 
@@ -298,7 +298,7 @@ export default function App({ ability }) {
                 <Sidenav
                   color={sidenavColor}
                   brand={(transparentSidenav && !darkMode) || whiteSidenav ? brandDark : brandWhite}
-                  brandName="Material Dashboard PRO"
+                  brandName="RIVIO"
                   routes={routes}
                   onMouseEnter={handleOnMouseEnter}
                   onMouseLeave={handleOnMouseLeave}
@@ -323,7 +323,7 @@ export default function App({ ability }) {
               <Sidenav
                 color={sidenavColor}
                 brand={(transparentSidenav && !darkMode) || whiteSidenav ? brandDark : brandWhite}
-                brandName="Material Dashboard PRO"
+                brandName="RIVIO"
                 routes={routes}
                 onMouseEnter={handleOnMouseEnter}
                 onMouseLeave={handleOnMouseLeave}

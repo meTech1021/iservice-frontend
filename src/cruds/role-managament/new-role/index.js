@@ -64,8 +64,8 @@ const NewRole = () => {
 
     try {
       await CrudService.createRole(role);
-      navigate("/examples-api/role-management", {
-        state: { value: true, text: "The role was sucesfully created" },
+      navigate("/role-management", {
+        state: { value: true, text: "The role was successfully created" },
       });
     } catch (err) {
       if (err.hasOwnProperty("errors")) {
@@ -118,7 +118,7 @@ const NewRole = () => {
                         px={2}
                         mx={2}
                         onClick={() =>
-                          navigate("/examples-api/role-management", {
+                          navigate("/role-management", {
                             state: { value: false, text: "" },
                           })
                         }
