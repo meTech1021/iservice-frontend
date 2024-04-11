@@ -357,7 +357,7 @@ const NewEntity = () => {
                                 type="text"
                                 label="First Name"
                                 name="firstName"
-                                value={firstName.text}
+                                value={firstName.text || ""}
                                 onChange={(e) => setFirstName({ ...firstName, text: e.target.value })}
                                 error={firstName.error}
                             />
@@ -372,7 +372,7 @@ const NewEntity = () => {
                                 type="text"
                                 label="Last Name"
                                 name="lastName"
-                                value={lastName.text}
+                                value={lastName.text || ""}
                                 onChange={(e) => setLastName({ ...lastName, text: e.target.value })}
                                 error={lastName.error}
                             />
@@ -392,7 +392,7 @@ const NewEntity = () => {
                                 type="text"
                                 label="Name"
                                 name="name"
-                                value={name.text}
+                                value={name.text || ""}
                                 onChange={(e) => setName({ ...name, text: e.target.value })}
                                 error={name.error}
                             />

@@ -157,7 +157,7 @@ const NewContact = () => {
                       type="text"
                       label="First Name"
                       name="first_name"
-                      value={first_name.text}
+                      value={first_name.text || ""}
                       onChange={changeFirstNameHandler}
                       error={first_name.error}
                     />
@@ -173,7 +173,7 @@ const NewContact = () => {
                       type="text"
                       label="Last Name"
                       name="last_name"
-                      value={last_name.text}
+                      value={last_name.text || ""}
                       onChange={changeLastNameHandler}
                       error={first_name.error}
                     />

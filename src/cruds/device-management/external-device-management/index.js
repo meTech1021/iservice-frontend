@@ -202,7 +202,7 @@ function ExternalDeviceManagement() {
       {notification.value && (
         <MDAlert color="info" my="20px">
           <MDTypography variant="body2" color="white">
-            {notification.text}
+            {notification.text || ""}
           </MDTypography>
         </MDAlert>
       )}

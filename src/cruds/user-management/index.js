@@ -152,6 +152,7 @@ function UserManagement() {
 
   const dataTableData = {
     columns: [
+      { Header: "ID", accessor: "id", width: "5%" },
       {
         Header: "image",
         accessor: "image",
@@ -243,7 +244,7 @@ function UserManagement() {
       {notification.value && (
         <MDAlert color="info" my="20px">
           <MDTypography variant="body2" color="white">
-            {notification.text}
+            {notification.text || ""}
           </MDTypography>
         </MDAlert>
       )}

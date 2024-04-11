@@ -34,6 +34,7 @@ import NewAPI from "cruds/api-management/new-api";
 import EditAPI from "cruds/api-management/edit-api";
 import NewMonitorDevice from "cruds/device-management/monitor-management/new-monitor";
 import EditMonitorDevice from "cruds/device-management/monitor-management/edit-monitor";
+import ViewMonitorDevice from "cruds/device-management/monitor-management/view-monitor";
 
 /** 
   All of the routes for the Material Dashboard 2 PRO React are added here,
@@ -154,6 +155,12 @@ const crudRoutes = [
     key: "new-monitor",
     route: "/monitor-management/new-monitor",
     component: <NewMonitorDevice />,
+    type: "monitors",
+  },
+  {
+    key: "view-monitor",
+    route: "/monitor-management/view-monitor/:id",
+    component: <ViewMonitorDevice />,
     type: "monitors",
   },
   {

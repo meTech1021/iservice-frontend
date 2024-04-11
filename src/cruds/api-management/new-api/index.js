@@ -177,7 +177,7 @@ const NewAPI = () => {
                         type="text"
                         label="Parameter Name"
                         name="parameter_name"
-                        value={parameter_name.text}
+                        value={parameter_name.text || ""}
                         onChange={changeParameterNameHandler}
                         error={parameter_name.error}
                     />                    
@@ -186,7 +186,7 @@ const NewAPI = () => {
                         type="text"
                         label="Parameter Value"
                         name="parameter_value"
-                        value={parameter_value.text}
+                        value={parameter_value.text || ""}
                         onChange={changeParameterValueHandler}
                         error={name.error}
                     />

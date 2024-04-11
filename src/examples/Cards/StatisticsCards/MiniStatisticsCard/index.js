@@ -76,7 +76,7 @@ function MiniStatisticsCard({ bgColor, title, count, percentage, icon, direction
                   textTransform="capitalize"
                   fontWeight={title.fontWeight}
                 >
-                  {title.text}
+                  {title.text || ""}
                 </MDTypography>
                 <MDTypography
                   variant="h5"
@@ -85,7 +85,7 @@ function MiniStatisticsCard({ bgColor, title, count, percentage, icon, direction
                 >
                   {count}{" "}
                   <MDTypography variant="button" color={percentage.color} fontWeight="bold">
-                    {percentage.text}
+                    {percentage.text || ""}
                   </MDTypography>
                 </MDTypography>
               </MDBox>

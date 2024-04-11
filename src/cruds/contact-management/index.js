@@ -151,6 +151,7 @@ function ContactManagement() {
 
   const dataTableData = {
     columns: [
+      { Header: "ID", accessor: "id", width: "5%" },
       { Header: "Status", accessor: "status", width: "15%" },
       { Header: "First Name", accessor: "first_name", width: "15%" },
       { Header: "Last Name", accessor: "last_name", width: "15%" },
@@ -194,7 +195,7 @@ function ContactManagement() {
       {notification.value && (
         <MDAlert color="info" my="20px">
           <MDTypography variant="body2" color="white">
-            {notification.text}
+            {notification.text || ""}
           </MDTypography>
         </MDAlert>
       )}

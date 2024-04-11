@@ -64,7 +64,6 @@ const ModalItem = ({moduleData, module, setModule, attributeValue, setAttributeV
   const removeItem = (index) => {
     const updatedModule = [...module];
     updatedModule.splice(index, 1);
-    console.log(updatedModule, module, index, '_________')
     setModule(updatedModule);
   };
 

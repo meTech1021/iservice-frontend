@@ -195,6 +195,7 @@ function InternalDeviceManagement() {
 
   const dataTableData = {
     columns: [
+      { Header: "ID", accessor: "id", width: "5%" },
       { Header: "Status", accessor: "status", width: "15%" },
       { Header: "Map Status", accessor: "map_status", width: "15%" },
       { Header: "Name", accessor: "name", width: "15%" },
@@ -256,7 +257,7 @@ function InternalDeviceManagement() {
       {notification.value && (
         <MDAlert color="info" my="20px">
           <MDTypography variant="body2" color="white">
-            {notification.text}
+            {notification.text || ""}
           </MDTypography>
         </MDAlert>
       )}

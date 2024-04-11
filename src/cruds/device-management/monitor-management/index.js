@@ -91,6 +91,10 @@ function MonitorManagement() {
     navigate("/monitor-management/new-monitor");
   };
 
+  const clickViewHandler = (id) => {
+    navigate(`/monitor-management/view-monitor/${id}`);
+  };
+
   const clickEditHandler = (id) => {
     navigate(`/monitor-management/edit-monitor/${id}`);
   };
@@ -107,7 +111,7 @@ function MonitorManagement() {
         setData(response.data);
         setNotification({
           value: true,
-          text: "The device has been successfully deleted",
+          text: "The device monitor has been successfully deleted",
         });
       }
     } catch (err) {
@@ -127,10 +131,14 @@ function MonitorManagement() {
   const getRows = (info) => {
     let updatedInfo = info.map((row) => {
       console.log(row, 'row')
+      const deviceNames = row.attributes?.DeviceMonitorAssociations.map(device => device.Device.name);
+      const combinedDeviceNames = deviceNames?.join(', ');
       return {
         type: "monitors",
         id: row.id,
-        device: row.attributes?.Device?.name,
+        name: row.attributes?.name,
+        frequency: row.attributes?.frequency,
+        device: combinedDeviceNames,
 
         status: (
           <Badge
@@ -148,9 +156,11 @@ function MonitorManagement() {
 
   const dataTableData = {
     columns: [
+      { Header: "ID", accessor: "id", width: "5%" },
       { Header: "Status", accessor: "status", width: "15%" },
+      { Header: "Monitor Name", accessor: "name", width: "15%" },
+      { Header: "Frequency", accessor: "frequency", width: "15%" },
       { Header: "Device", accessor: "device", width: "15%" },
-
       {
         Header: "actions",
         disableSortBy: true,
@@ -160,7 +170,7 @@ function MonitorManagement() {
             <MDBox display="flex" alignItems="center">
               {ability.can("view", "devices") && (
                 <Tooltip title="View Monitor">
-                  <IconButton onClick={() => clickEditHandler(info.cell.row.original.id)}>
+                  <IconButton onClick={() => clickViewHandler(info.cell.row.original.id)}>
                     <VisibilityIcon />
                   </IconButton>
                 </Tooltip>
@@ -194,7 +204,7 @@ function MonitorManagement() {
       {notification.value && (
         <MDAlert color="info" my="20px">
           <MDTypography variant="body2" color="white">
-            {notification.text}
+            {notification.text || ""}
           </MDTypography>
         </MDAlert>
       )}

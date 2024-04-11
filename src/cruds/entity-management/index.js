@@ -189,6 +189,7 @@ function EntityManagement() {
 
   const dataTableData = {
     columns: [
+      { Header: "ID", accessor: "id", width: "5%" },
       { Header: "Status", accessor: "status", width: "15%" },
       { Header: "Entity Name", accessor: "name", width: "20%" },
       { Header: "Company", accessor: "company", width: "20%" },
@@ -251,7 +252,7 @@ function EntityManagement() {
       {notification.value && (
         <MDAlert color="info" my="20px">
           <MDTypography variant="body2" color="white">
-            {notification.text}
+            {notification.text || ""}
           </MDTypography>
         </MDAlert>
       )}

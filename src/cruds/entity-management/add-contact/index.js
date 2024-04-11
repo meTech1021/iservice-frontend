@@ -139,7 +139,6 @@ const ModalContact = ({
           >
           </Badge>
         ),
-
     };
     return [rowData];
   };
@@ -185,17 +184,17 @@ const ModalContact = ({
               aria-describedby="modal-description"
           >
               <Card
-              sx={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  width: '80%', // Set the desired width here
-                  backgroundColor: 'white',
-                  border: '2px solid #000',
-                  boxShadow: 24,
-                  p: 4,
-              }}
+                sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '80%', // Set the desired width here
+                    backgroundColor: 'white',
+                    border: '2px solid #000',
+                    boxShadow: 24,
+                    p: 4,
+                }}
               >
                   <MDBox display="flex" flexDirection="column" px={3} my={2} >
                       <MDBox p={1}>
@@ -203,7 +202,7 @@ const ModalContact = ({
                               type="text"
                               label="First Name"
                               name="contact_first_name"
-                              value={contact_first_name.text}
+                              value={contact_first_name.text || ""}
                               onChange={changeFirstNameHandler}
                               error={contact_first_name.error}
                           />
@@ -219,7 +218,7 @@ const ModalContact = ({
                               type="text"
                               label="Last Name"
                               name="contact_last_name"
-                              value={contact_last_name.text}
+                              value={contact_last_name.text || ""}
                               onChange={changeLastNameHandler}
                               error={contact_first_name.error}
                           />

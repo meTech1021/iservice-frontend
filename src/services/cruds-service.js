@@ -125,6 +125,16 @@ class CrudService {
     return await HttpService.get(deviceParametersEndpoint);
   }
   
+  getComparisonOperators = async () => {
+    const comparisonOperatorsEndpoint = "modules/comparison_operators";
+    return await HttpService.get(comparisonOperatorsEndpoint);
+  }
+  
+  getThresholdTypes = async () => {
+    const thresholdTypesEndpoint = "modules/threshold_types";
+    return await HttpService.get(thresholdTypesEndpoint);
+  }
+  
   // getStatusTypes = async (moduleId) => {
   //   const endpoint = `modules/status_types/${moduleId}`;
   //   return await HttpService.post(endpoint);
@@ -354,6 +364,12 @@ class CrudService {
     const endpoint = "devices/map";
     return await HttpService.post(endpoint, payload);
   };
+
+  getDeviceParameterValues = async (id) => {
+    const endpoint = `externals/${id}`;
+    return await HttpService.get(endpoint);
+  };
+   
 
     ////////// device monitor ////////////
 

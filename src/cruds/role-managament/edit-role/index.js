@@ -96,7 +96,7 @@ const EditRole = () => {
 
   return (
     <DashboardLayout>
-      <DashboardNavbar breadcrumbTitle={name.text}/>
+      <DashboardNavbar breadcrumbTitle={name.text || ""}/>
       <MDBox mt={5} mb={9}>
         <Grid container justifyContent="center">
           <Grid item xs={12} lg={8}>
@@ -118,7 +118,7 @@ const EditRole = () => {
                       type="text"
                       label="Name"
                       name="name"
-                      value={name.text}
+                      value={name.text || ""}
                       onChange={changeNameHandler}
                       error={name.error}
                     />

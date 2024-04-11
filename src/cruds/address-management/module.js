@@ -509,28 +509,28 @@ const ModalModuleAddress = ({addressTypes, statusOptions, addresses, setAddresse
                             </Grid>
                           </Grid>
                           <Autocomplete
-                          required
-                          defaultValue=""
-                          value={addressType}
-                          options={addressTypes}
-                          getOptionLabel={(option) => (option ? option.attributes?.type_name : "")}
-                          style={{ marginTop: "1rem" }}
-                          onChange={(event, newAddressType) => changeAddressHandler(indexAddr, "address_type_id", newAddressType ? newAddressType.attributes?.address_type_id : null)}
-                          renderInput={(params) => (
-                              <FormField {...params} label="Address Type *" InputLabelProps={{ shrink: true }} />
-                          )}
+                            required
+                            defaultValue=""
+                            value={addressType}
+                            options={addressTypes}
+                            getOptionLabel={(option) => (option ? option.attributes?.type_name : "")}
+                            style={{ marginTop: "1rem" }}
+                            onChange={(event, newAddressType) => changeAddressHandler(indexAddr, "address_type_id", newAddressType ? newAddressType.attributes?.address_type_id : null)}
+                            renderInput={(params) => (
+                                <FormField {...params} label="Address Type *" InputLabelProps={{ shrink: true }} />
+                            )}
                           />           
                           <Autocomplete
-                          required
-                          defaultValue=""
-                          value={statusOption}
-                          options={statusOptions}
-                          getOptionLabel={(option) => (option ? option.attributes?.StatusType?.status_name : "")}
-                          style={{ marginTop: "1rem" }}
-                          onChange={(event, newStatusType) => changeAddressHandler(indexAddr, "status_type_id", newStatusType ? newStatusType.attributes?.StatusType?.status_type_id : null)}
-                          renderInput={(params) => (
-                              <FormField {...params} label="Status *" InputLabelProps={{ shrink: true }} />
-                          )}
+                            required
+                            defaultValue=""
+                            value={statusOption}
+                            options={statusOptions}
+                            getOptionLabel={(option) => (option ? option.attributes?.StatusType?.status_name : "")}
+                            style={{ marginTop: "1rem" }}
+                            onChange={(event, newStatusType) => changeAddressHandler(indexAddr, "status_type_id", newStatusType ? newStatusType.attributes?.StatusType?.status_type_id : null)}
+                            renderInput={(params) => (
+                                <FormField {...params} label="Status *" InputLabelProps={{ shrink: true }} />
+                            )}
                           />   
                           {
                             moduleType !== "" && 

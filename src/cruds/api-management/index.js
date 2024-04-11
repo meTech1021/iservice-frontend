@@ -138,6 +138,7 @@ function APIManagement() {
 
   const dataTableData = {
     columns: [
+      { Header: "ID", accessor: "id", width: "5%" },
       { Header: "API Name", accessor: "api_name", width: "20%" },
       { Header: "Name", accessor: "name", width: "20%" },
       { Header: "Value", accessor: "value", width: "20%" },
@@ -179,7 +180,7 @@ function APIManagement() {
       {notification.value && (
         <MDAlert color="info" my="20px">
           <MDTypography variant="body2" color="white">
-            {notification.text}
+            {notification.text || ""}
           </MDTypography>
         </MDAlert>
       )}

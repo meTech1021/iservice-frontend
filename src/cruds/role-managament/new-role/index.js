@@ -99,7 +99,7 @@ const NewRole = () => {
                       type="text"
                       label="Name"
                       name="name"
-                      value={name.text}
+                      value={name.text || ""}
                       onChange={changeNameHandler}
                       error={name.error}
                     />

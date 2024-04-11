@@ -158,6 +158,7 @@ function CompanyManagement() {
 
   const dataTableData = {
     columns: [
+      { Header: "ID", accessor: "id", width: "5%" },
       { Header: "name", accessor: "name", width: "20%" },
       {
         Header: "Organization",
@@ -215,7 +216,7 @@ function CompanyManagement() {
       {notification.value && (
         <MDAlert color="info" my="20px">
           <MDTypography variant="body2" color="white">
-            {notification.text}
+            {notification.text || ""}
           </MDTypography>
         </MDAlert>
       )}

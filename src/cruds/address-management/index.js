@@ -43,8 +43,6 @@ const ModalAddress = ({addressTypes, statusOptions, addresses, setAddresses, sel
   const [open, setOpen] = useState(false);
   const [indexAddr, setIndexAddr] = useState(0);
   const [handleMode, setHandleMode] = useState(false);
-  const [module, setModule] = useState([]);
-  const [attributeValues, setAttributeValues] = useState([]);
 
   const changeAddressHandler = (index, field, value) => {
     if(!handleMode) {
