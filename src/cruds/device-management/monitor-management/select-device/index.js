@@ -25,20 +25,15 @@ import MDButton from "components/MDButton";
 import MDTypography from "components/MDTypography";
 
 // Material Dashboard 2 PRO React examples
-import DataTable from "examples/Tables/DataTable";
-import { CardContent, Typography, Tooltip, IconButton } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import DeviceSelectDataTable from "./datatable";
+import { CardContent, Typography } from "@mui/material";
+import MultiSelectDataTable from "examples/Tables/MultiSelectDataTable";
 
-const ModalDeviceSelect = ({devices, device, setDevice }) => {
+const ModalMultiSelect = ({rowData, selectedRows, setSelectedRows, label }) => {
   const [open, setOpen] = useState(false);
-  const [selectedRows, setSelectedRows] = useState([]);
-
-  const removeAddress = (index) => {
-    setDevice([]);
-  };
+  const [tempSelectedRows, setTempSelectedRows] = useState([]);
 
   const handleOpen = () => {
+    setTempSelectedRows([]);
     setOpen(true);
   };
 
@@ -46,108 +41,58 @@ const ModalDeviceSelect = ({devices, device, setDevice }) => {
     setOpen(false);
   };
 
-  const addressHandler = () => {
-    // setDevices([...Devices, newAddress]);
-    const filteredDevices = devices.filter(device => selectedRows.includes(device.id));
-    setDevice(filteredDevices);
+  const saveHandler = () => {
+    const updatedRows = [...tempSelectedRows];
+    setSelectedRows(updatedRows);
     setOpen(false);
-  };
-
-
-  const getRows = (info) => {
-    let updatedInfo = info.map((row, index) => {
-        return {
-            type: "devices",
-            id: index,
-        };
-    });
-    return updatedInfo;
-  };
-
-  const dataTableData = {
-    columns: [
-      {
-        Header: "actions",
-        disableSortBy: true,
-        accessor: "",
-        Cell: (info) => {
-          return (
-            <MDBox display="flex" alignItems="center">
-              {(
-                <Tooltip title="Delete Company">
-                  <IconButton onClick={() => removeAddress(info.cell.row.original.id)}>
-                    <DeleteIcon />
-                  </IconButton>
-                </Tooltip>
-              )}
-            </MDBox>
-          );
-        },
-      }
-    ],
-
-    rows: getRows(device),
-  };
+  }
 
   return (
-    <Card>
-        <MDBox display="flex" flexDirection="column" px={3} my={2}>
-            <MDBox display="flex" flexDirection="column" style={{marginTop: "1rem"}}>
-                <MDBox
-                    display="flex"
-                >
-                    <MDTypography variant="h5" color="secondary"  fontWeight="bold">
-                    Device
-                    </MDTypography>
-                    <MDButton variant="gradient" color="dark" size="small" style={{marginLeft: "1rem"}} onClick={handleOpen}>Select Device</MDButton>
-                </MDBox>
-
-                <Modal
-                    open={open}
-                    onClose={handleClose}
-                    aria-labelledby="modal-title"
-                    aria-describedby="modal-description"
-                >
-                    <Card
-                    sx={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: '80%', // Set the desired width here
-                        backgroundColor: 'white',
-                        border: '2px solid #000',
-                        boxShadow: 24,
-                        p: 4,
-                    }}
-                    >
-                    <CardContent>
-                        <Typography>Select Device</Typography>
-                        <DeviceSelectDataTable rowData={devices} selectedRows={selectedRows} setSelectedRows={setSelectedRows}/>
-                        <MDBox ml="auto" mt={3} display="flex" justifyContent="flex-end">
-                            <MDButton variant="contained" color="secondary" onClick={handleClose}>
-                                Cancel
-                            </MDButton>
-                            <MDButton variant="contained" color="info" onClick={addressHandler} style={{marginLeft: '10px'}}>
-                                Save
-                            </MDButton>
-                        </MDBox>
-                    </CardContent>
-                    </Card>
-                </Modal>
-                
-            </MDBox>
-            <MDBox>
-              {device.length > 0 && (
-                <DataTable
-                  table={dataTableData}
-                  canSearch={true}
-                />
-              )}
-            </MDBox>
+    <MDBox display="flex" flexDirection="column" style={{marginTop: "1rem"}}>
+        <MDBox
+            display="flex"
+        >
+          <MDTypography variant="h5" color="secondary"  fontWeight="bold">
+            {label}
+          </MDTypography>
+          <MDButton variant="gradient" color="dark" size="small" style={{marginLeft: "1rem"}} onClick={handleOpen}>Select {label}</MDButton>
         </MDBox>
-    </Card>
+
+        <Modal
+            open={open}
+            onClose={handleClose}
+            aria-labelledby="modal-title"
+            aria-describedby="modal-description"
+        >
+          <Card
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '80%', // Set the desired width here
+              backgroundColor: 'white',
+              border: '2px solid #000',
+              boxShadow: 24,
+              p: 4,
+            }}
+          >
+            <CardContent>
+                <Typography>Select {label} </Typography>
+                <MultiSelectDataTable rowData={rowData} selectedRows={tempSelectedRows} setSelectedRows={setTempSelectedRows}/>
+                <MDBox ml="auto" mt={3} display="flex" justifyContent="flex-end">
+                    <MDButton variant="contained" color="secondary" onClick={handleClose}>
+                        Cancel
+                    </MDButton>
+                    <MDButton variant="contained" color="info" onClick={saveHandler} style={{marginLeft: '10px'}}>
+                        Save
+                    </MDButton>
+                </MDBox>
+            </CardContent>
+          </Card>
+        </Modal>
+            </MDBox>
   );
 };
 
-export default ModalDeviceSelect;
+export default ModalMultiSelect;

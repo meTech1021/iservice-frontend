@@ -35,6 +35,8 @@ import EditAPI from "cruds/api-management/edit-api";
 import NewMonitorDevice from "cruds/device-management/monitor-management/new-monitor";
 import EditMonitorDevice from "cruds/device-management/monitor-management/edit-monitor";
 import ViewMonitorDevice from "cruds/device-management/monitor-management/view-monitor";
+import NewParameter from "cruds/api/mapping/internal-parameter/new-parameter";
+import EditParameter from "cruds/api/mapping/internal-parameter/edit-parameter";
 
 /** 
   All of the routes for the Material Dashboard 2 PRO React are added here,
@@ -192,7 +194,20 @@ const crudRoutes = [
     route: "/api-management/edit-api/:id",
     component: <EditAPI />,
     type: "apis",
-  }
+  },
+  {
+    key: "new-internal-parameter",
+    route: "/internal-parameter-management/new-parameter",
+    component: <NewParameter />,
+    type: "parameters",
+  },
+  {
+    key: "edit-internal-parameter",
+    route: "/internal-parameter-management/edit-parameter/:id",
+    component: <EditParameter />,
+    type: "parameters",
+  },
+
 ];
 
 export default crudRoutes;

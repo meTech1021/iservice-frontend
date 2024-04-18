@@ -36,7 +36,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'material-react-toastify/dist/ReactToastify.css';
 
 import CrudService from "services/cruds-service";
-import ModalAddress from "cruds/address-management";
+import ModalAddress from "cruds/common/add-address";
 
 const EditCompany = () => {
   const { id } = useParams();

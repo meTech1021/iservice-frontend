@@ -35,7 +35,7 @@ import { Autocomplete } from "@mui/material";
 import { MODULE_MASTER } from "utils/constant"
 
 import CrudService from "services/cruds-service";
-import ModalAddressSelect from "cruds/address-management/select";
+import ModalAddressSelect from "cruds/common/select-address";
 
 const EditItem = () => {
   const { id } = useParams();

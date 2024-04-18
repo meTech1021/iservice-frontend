@@ -124,6 +124,21 @@ class CrudService {
     const deviceParametersEndpoint = "modules/device-parameters";
     return await HttpService.get(deviceParametersEndpoint);
   }
+
+  getIcons = async () => {
+    const iconsEndpoint = "modules/icons";
+    return await HttpService.get(iconsEndpoint);
+  }
+
+  getFieldTypes = async () => {
+    const fieldTypesEndpoint = "modules/fieldTypes";
+    return await HttpService.get(fieldTypesEndpoint);
+  }
+  
+  getDeviceParameterTypes = async () => {
+    const deviceParameterTypesEndpoint = "modules/device-parameter-types";
+    return await HttpService.get(deviceParameterTypesEndpoint);
+  }
   
   getComparisonOperators = async () => {
     const comparisonOperatorsEndpoint = "modules/comparison_operators";
@@ -365,18 +380,65 @@ class CrudService {
     return await HttpService.post(endpoint, payload);
   };
 
+
+  /////////////////// parameter ///////////////////
+  
+  getExternalParameters = async () => {
+    const paramsEndpoint = "parameters/external-parameters";
+    return await HttpService.get(paramsEndpoint);
+  };
+
+  getInternalParameters = async () => {
+    const paramsEndpoint = "parameters/internal-parameters";
+    return await HttpService.get(paramsEndpoint);
+  };
+
   getDeviceParameterValues = async (id) => {
-    const endpoint = `externals/${id}`;
+    const endpoint = `parameters/parameter-logs/${id}`;
     return await HttpService.get(endpoint);
   };
    
+  getInternalParameter = async (id) => {
+    const endpoint = `parameters/${id}`
+    return await HttpService.get(endpoint);
+  }
 
-    ////////// device monitor ////////////
+  getInternalFromExternalParameter = async (id) => {
+    const endpoint = `parameters/external/${id}`
+    return await HttpService.get(endpoint);
+  }
+
+  mapParameter = async (payload) => {
+    const endpoint = "parameters/map-parameter";
+    return await HttpService.post(endpoint, payload);
+  };
+
+  createInternalParameter = async (payload) => {
+    const endpoint = "parameters";
+    return await HttpService.post(endpoint, payload);
+  };
+
+  updateInternalParameter = async (payload, id) => {
+    const endpoint = `parameters/${id}`;
+    return await HttpService.patch(endpoint, payload);
+  };
+
+  deleteInternalParameter = async (id) => {
+    const endpoint = `parameters/${id}`;
+    return await HttpService.delete(endpoint);
+  };
+
+  ////////// device monitor ////////////
 
     getDeviceMonitors = async () => {
       const tagsEndpoint = "monitors";
       return await HttpService.get(tagsEndpoint);
     };
+
+    getInternalRestDevices = async () => {
+      const tagsEndpoint = "devices/rest";
+      return await HttpService.get(tagsEndpoint);
+    };  
   
     createDeviceMonitor = async (payload) => {
       const endpoint = "monitors";

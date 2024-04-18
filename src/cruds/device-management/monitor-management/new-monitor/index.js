@@ -18,7 +18,7 @@ import { useState, useEffect } from "react";
 // @mui material components
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
-import { Autocomplete, Tooltip, IconButton } from "@mui/material";
+import { Autocomplete, Tooltip, IconButton, Badge, Typography } from "@mui/material";
 import { Select, MenuItem, InputLabel } from '@mui/material';
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -39,7 +39,7 @@ import { useNavigate } from "react-router-dom";
 import CrudService from "services/cruds-service";
 import { MODULE_MASTER } from "utils/constant";
 import DataTable from "examples/Tables/DataTable";
-import ModalDeviceSelect from "../select-device";
+import ModalMultiSelect from "../select-device";
 
 const NewMonitorDevice = () => {
     const navigate = useNavigate();
@@ -57,20 +57,31 @@ const NewMonitorDevice = () => {
     const [timeUnit, setTimeUnit] = useState("Hour");
     const [device, setDevice] = useState([]);
     const [devices, setDevices] = useState([]);
+    const [tempDevices, setTempDevices] = useState([]);     // this is to dispaly temp in data table of modal
     const [comparisonOperators, setComparisonOperators] = useState([]);
     const [thresholdTypes, setThresholdTypes] = useState([]);
 
-    const [deviceParameters, setDeviceParameters] = useState([{label: "Select All", value: "all"}]);
+    const [deviceParameters, setDeviceParameters] = useState([]);
+    const [tempDeviceThresholds, setTempDeviceThresholds] = useState([]);       // temp data to be displayed in data table of modal
+    const [selectedThresholds, setSelectedThresholds] = useState([]);
+
+    const [tempDeviceParameters, setTempDeviceParameters] = useState([]);       // temp data to be displayed in data table of modal
     const [selectedParameters, setSelectedParameters] = useState([]);
 
     const [statusType, setStatusType] = useState([]);
     const [statusDevice, setStatusDevice] = useState([]);
 
+    const [selectedDeviceRows, setSelectedDeviceRows] = useState([]);
+    const [selectedThreRows, setSelectedThreRows] = useState([]);
+    const [selectedParameterRows, setSelectedParameterRows] = useState([]);
+
     useEffect(() => {
         (async () => {
         try {
-            const response = await CrudService.getInternalDevices();
+            const response = await CrudService.getInternalRestDevices();
             setDevices(response.data);
+            console.log(response.data, 'response.data')
+            setTempDevices(response.data);
         } catch (err) {
             console.error(err);
             return null;
@@ -91,11 +102,15 @@ const NewMonitorDevice = () => {
         (async () => {
             try {
                 const response = await CrudService.getDeviceParameters();
-                const parametersWithSelectAll = [
-                    { label: "Select All", value: "all" },
-                    ...response.data
-                ];
-                setDeviceParameters(parametersWithSelectAll);
+                // const parametersWithSelectAll = [
+                //     { label: "Select All", value: "all" },
+                //     ...response.data
+                // ];
+                setDeviceParameters(response.data);
+                setTempDeviceParameters(response.data)
+                setTempDeviceThresholds(response.data.filter(item => item.is_threshold_required === true));
+
+                console.log(response.data, 'response.data')
             } catch (err) {
                 console.error(err);
                 return null;
@@ -106,7 +121,6 @@ const NewMonitorDevice = () => {
             try {
                 const response = await CrudService.getThresholdTypes();
                 setThresholdTypes(response.data);
-                console.log(response.data, 'type')
             } catch (err) {
                 console.error(err);
                 return null;
@@ -117,13 +131,39 @@ const NewMonitorDevice = () => {
             try {
                 const response = await CrudService.getComparisonOperators();
                 setComparisonOperators(response.data);
-                console.log(response.data, 'com')
             } catch (err) {
                 console.error(err);
                 return null;
             }
         })();
     }, []);
+
+    useEffect(() => {
+        const filteredDevices = devices.filter(device => selectedDeviceRows.includes(device.id));
+        const updatedDevice = [...device, ...filteredDevices];
+        setDevice(updatedDevice);
+
+        const restDevices = devices.filter(param => !updatedDevice.some(updatedDevice => updatedDevice.device_id === param.id));
+        setTempDevices(restDevices);
+    }, [selectedDeviceRows]);
+
+    useEffect(() => {
+        const filteredThresholds = deviceParameters.filter(param => selectedThreRows.includes(param.parameter_id));
+        const updatedThresholds = [...selectedThresholds, ...filteredThresholds];
+        setSelectedThresholds(updatedThresholds);
+
+        const restThresholds = deviceParameters.filter(threshold => !updatedThresholds.some(updatedThreshold => updatedThreshold.parameter_id === threshold.parameter_id));
+        setTempDeviceThresholds(restThresholds);
+    }, [selectedThreRows]);
+
+    useEffect(() => {
+        const filteredParams = deviceParameters.filter(param => selectedParameterRows.includes(param.parameter_id));
+        const updatedParameters = [...selectedParameters, ...filteredParams];
+        setSelectedParameters(updatedParameters);
+
+        const restParams = deviceParameters.filter(param => !updatedParameters.some(updatedParam => updatedParam.parameter_id === param.parameter_id));
+        setTempDeviceParameters(restParams);
+    }, [selectedParameterRows]);
 
     const changeNameHandler = (e) => {
         setName({ ...name, text: e.target.value });
@@ -137,10 +177,31 @@ const NewMonitorDevice = () => {
         const updatedParameters = [...selectedParameters];
         updatedParameters.splice(index, 1);
         setSelectedParameters(updatedParameters);
+        
+        const restParams = deviceParameters.filter(param => !updatedParameters.some(updatedParam => updatedParam.parameter_id === param.parameter_id));
+        setTempDeviceParameters(restParams);
+    }
+
+    const removeThreshold = (index) => {
+        const updatedThresholds = [...selectedThresholds];
+        updatedThresholds.splice(index, 1);
+        setSelectedThresholds(updatedThresholds);
+        
+        const restParams = deviceParameters.filter(threshold => !updatedThresholds.some(updatedParam => updatedParam.parameter_id === threshold.parameter_id));
+        setTempDeviceThresholds(restParams);
+    }
+
+    const removeDevice = (index) => {
+        const updatedDevice = [...device]
+        updatedDevice.splice(index, 1);
+        setDevice(updatedDevice);
+
+        const restDevices = devices.filter(param => !updatedDevice.some(updatedDevice => updatedDevice.device_id === param.device_id));
+        setTempDevices(restDevices);
     }
 
     const getRows = () => {
-        return selectedParameters.map((row, index) => {
+        return selectedThresholds.map((row, index) => {
             const fields = [
                 {
                     parameter_name: row.parameter_name
@@ -203,7 +264,7 @@ const NewMonitorDevice = () => {
         });
     };
 
-    const dataTableData = {
+    const tableThresholdData = {
         columns: [
             { Header: "Parameter Name", accessor: "parameter_name" },
             { Header: "Threshold Type", accessor: "threshold_type" },
@@ -213,6 +274,53 @@ const NewMonitorDevice = () => {
                 Header: "Alert Enabled",
                 accessor: 'alert_enabled'
             },
+            {
+                Header: "actions",
+                disableSortBy: true,
+                accessor: "",
+                Cell: (info) => {
+                  return (
+                    <MDBox display="flex" alignItems="center">
+                      {(
+                        <Tooltip title="Delete Parameter">
+                          <IconButton onClick={() => removeThreshold(info.cell.row.index)}>
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                    </MDBox>
+                  );
+                },
+            }
+        ],
+        rows: getRows(),
+    };
+
+    const getParameterRows = (info) => {
+        let updatedInfo = info.map((row) => {
+            return {
+                id: row.parameter_id,
+                name: row.parameter_name,
+                type: row.DeviceParameterType?.type_name,
+                label: row.label,
+                tooltip: row.tooltip,
+                api_name: row.AplName?.api_name,
+                is_allowed: row.is_threshold_required ? "True" : "False",  
+            };
+        });
+        return updatedInfo;
+    }
+
+
+    const tableParameterData = {
+        columns: [
+            { Header: "ID", accessor: "id" },
+            { Header: "Parameter Name", accessor: "name" },
+            { Header: "Type", accessor: "type" },
+            { Header: "Label", accessor: "label" },
+            { Header: "Tool Tip", accessor: "tooltip" },
+            { Header: "API Name", accessor: "api_name" },
+            { Header: "Threshold Allowed", accessor: "is_allowed" },
             {
                 Header: "actions",
                 disableSortBy: true,
@@ -232,9 +340,66 @@ const NewMonitorDevice = () => {
                 },
             }
         ],
-        rows: getRows(),
+        rows: getParameterRows(selectedParameters),
     };
 
+    const getDeviceRows = (info) => {
+        let updatedInfo = info.map((row) => {
+            return {
+                id: row.attributes?.device_id,
+                status: row.attributes?.StatusOption,
+                name: row.attributes?.name,
+                type: row.attributes?.DeviceType?.type_name,
+                brand: row.attributes?.DeviceBrand?.brand_name,
+                model: row.attributes?.DeviceModel?.model_name,
+                entity: row.attributes?.EntityAddressItem?.Entity?.name,
+                item: row.attributes?.EntityAddressItem?.Item?.name,  
+
+            };
+        });
+        return updatedInfo;
+    }
+
+    const tableDeviceData = {
+        columns: [
+          { Header: "ID", accessor: "id", width: "5%" },
+          { Header: "name", accessor: "name", width: "20%" },
+          { Header: "type", accessor: "type", width: "15%" },
+          { Header: "brand", accessor: "brand", width: "15%" },
+          { Header: "model", accessor: "model", width: "15%" },
+          { Header: "entity", accessor: "entity", width: "15%" },
+          { Header: "item", accessor: "item", width: "15%" },
+          {
+            Header: "actions",
+            disableSortBy: true,
+            accessor: "",
+            Cell: (info) => {
+              return (
+                <MDBox display="flex" alignItems="center">
+                    <Tooltip title="Delete Device">
+                        <IconButton onClick={() => removeDevice(info.cell.row.index)}>
+                            <DeleteIcon />
+                        </IconButton>
+                    </Tooltip>
+                </MDBox>
+              );
+            },
+          },
+        ],
+    
+        rows: getDeviceRows(device),
+    };
+
+    const getParamRows = (info) => {
+        let updatedInfo = info.map((row) => {
+            return {
+                id: row.parameter_id,
+                name: row.label,
+                type: row.FieldType?.name,
+            };
+        });
+        return updatedInfo;
+    }
     
     const validateInput = (field_type_id, value) => {
         switch (field_type_id) {
@@ -289,43 +454,43 @@ const NewMonitorDevice = () => {
     };
     
     const handlethresholdTypeChange = (index, NewThresholdType) => {
-        const updatedDataTable = [...selectedParameters];
+        const updatedDataTable = [...selectedThresholds];
         updatedDataTable[index].threshold_type_id = NewThresholdType?.id;
-        setSelectedParameters(updatedDataTable);
+        setSelectedThresholds(updatedDataTable);
     };
 
     const handlethresholdValueChange = (index, value) => {
-        const updatedDataTable = [...selectedParameters];
+        const updatedDataTable = [...selectedThresholds];
         updatedDataTable[index].threshold_value = value;
-        setSelectedParameters(updatedDataTable);
+        setSelectedThresholds(updatedDataTable);
     };
 
     const handleThresholdOperatorChange = (index, NewComparisonOperator) => {
-        const updatedDataTable = [...selectedParameters];
+        const updatedDataTable = [...selectedThresholds];
         updatedDataTable[index].comparison_operator_id = NewComparisonOperator?.id;
-        setSelectedParameters(updatedDataTable);
+        setSelectedThresholds(updatedDataTable);
     };
 
     const handlealertEnabledChange = (index, value) => {
-        const updatedDataTable = [...selectedParameters];
+        const updatedDataTable = [...selectedThresholds];
         updatedDataTable[index].alert_enabled = value;
-        setSelectedParameters(updatedDataTable);
+        setSelectedThresholds(updatedDataTable);
     };
     
     const submitHandler = async (e) => {
         e.preventDefault();
         let hasValidationError = false;
-        const updatedSelectedParameters = [...selectedParameters];
-        updatedSelectedParameters.forEach(updatedSelectedParameter => {
-            const validError = validateInput(updatedSelectedParameter?.field_type_id, updatedSelectedParameter?.threshold_value)
-            updatedSelectedParameter.validationError = validError;
+        const updatedSelectedThresholds = [...selectedThresholds];
+        updatedSelectedThresholds.forEach(updatedSelectedThreshold => {
+            const validError = validateInput(updatedSelectedThreshold?.field_type_id, updatedSelectedThreshold?.threshold_value)
+            updatedSelectedThreshold.validationError = validError;
             if (validError) {
                 hasValidationError = validError;
                 return;
             }    
         })
 
-        setSelectedParameters(updatedSelectedParameters);
+        setSelectedThresholds(updatedSelectedThresholds);
 
         if(hasValidationError)
             return;
@@ -338,11 +503,11 @@ const NewMonitorDevice = () => {
                     devices: device,
                     timeUnit: timeUnit,
                     statusType: statusType?.attributes,
-                    deviceParameters: selectedParameters
+                    deviceParameters: selectedParameters,
+                    deviceParameterThresholds: selectedThresholds
                 }
             },
         };
-
         console.log(monitor, 'monitor')
         try {
             await CrudService.createDeviceMonitor(monitor);
@@ -353,6 +518,7 @@ const NewMonitorDevice = () => {
             console.error(err);
         }
     };
+
 
     return (
         <DashboardLayout>
@@ -380,6 +546,7 @@ const NewMonitorDevice = () => {
                                             name="name"
                                             value={name.text || ""}
                                             onChange={changeNameHandler}
+                                            InputLabelProps={{ shrink: true }}
                                             error={name.error}
                                         />
                                         {name.error && (
@@ -397,6 +564,7 @@ const NewMonitorDevice = () => {
                                             value={frequency.text || ""}
                                             onChange={changeFrequencyHandler}
                                             error={frequency.error}
+                                            InputLabelProps={{ shrink: true }}
                                         />
                                         <MDBox style={{ marginLeft: '10px' }}>
                                             <Autocomplete
@@ -419,7 +587,7 @@ const NewMonitorDevice = () => {
                                         )}
                                     </MDBox>
                                     
-                                    <Autocomplete
+                                    {/* <Autocomplete
                                         multiple
                                         disableCloseOnSelect
                                         defaultValue={[]}
@@ -433,7 +601,7 @@ const NewMonitorDevice = () => {
                                         renderInput={(params) => (
                                             <FormField {...params} label="Device" InputLabelProps={{ shrink: true }} />
                                         )}
-                                    />
+                                    /> */}
 
                                     <Autocomplete
                                         defaultValue=""
@@ -448,7 +616,7 @@ const NewMonitorDevice = () => {
                                         )}
                                     />   
                                     
-                                    <Autocomplete
+                                    {/* <Autocomplete
                                         multiple
                                         defaultValue={[]}
                                         options={deviceParameters}
@@ -465,11 +633,15 @@ const NewMonitorDevice = () => {
                                         renderInput={(params) => (
                                             <FormField {...params} label="Parameter" InputLabelProps={{ shrink: true }} />
                                         )}
-                                    />
+                                    /> */}
+                                    <ModalMultiSelect rowData={getDeviceRows(tempDevices)} selectedRows={selectedDeviceRows} setSelectedRows={setSelectedDeviceRows} label="Devices"/>                                    
+                                    <DataTable table={tableDeviceData} canSearch={true} />
 
-                                    <DataTable table={dataTableData} canSearch={true} />
-
-                                    <ModalDeviceSelect devices={devices} device={device} setDevice={setDevice} /> 
+                                    <ModalMultiSelect rowData={getParameterRows(tempDeviceParameters)} selectedRows={selectedParameterRows} setSelectedRows={setSelectedParameterRows} label="Parameters"/>                                    
+                                    <DataTable table={tableParameterData} canSearch={true} />
+                                    
+                                    <ModalMultiSelect rowData={getParamRows(tempDeviceThresholds)} selectedRows={selectedThreRows} setSelectedRows={setSelectedThreRows} label="Thresholds"/>
+                                    <DataTable table={tableThresholdData} canSearch={true} />
 
                                     <MDBox ml="auto" mt={4} mb={2} display="flex" justifyContent="flex-end">
                                         <MDBox mx={2}>

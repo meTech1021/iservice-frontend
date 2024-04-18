@@ -37,7 +37,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'material-react-toastify/dist/ReactToastify.css';
 
 import CrudService from "services/cruds-service";
-import ModalModuleAddress from "cruds/address-management/module";
+import ModalModuleAddress from "../add-module";
 import ModalContact from "../add-contact";
 import ModalSelectContact from "../add-contact/select";
 

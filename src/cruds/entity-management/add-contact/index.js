@@ -30,7 +30,7 @@ import FormField from "layouts/applications/wizard/components/FormField";
 import { useNavigate } from "react-router-dom";
 
 import CrudService from "services/cruds-service";
-import ModalContactAddressSelect from "cruds/address-management/contact";
+import ModalContactAddressSelect from "cruds/common/contact";
 import { MODULE_MASTER } from "utils/constant";
 import { ToastContainer, toast } from 'react-toastify';
 import 'material-react-toastify/dist/ReactToastify.css';

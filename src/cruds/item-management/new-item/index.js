@@ -35,7 +35,7 @@ import { useNavigate } from "react-router-dom";
 
 import CrudService from "services/cruds-service";
 import MultiSelectDataTable from "examples/Tables/MultiSelectDataTable";
-import ModalAddressSelect from "cruds/address-management/select";
+import ModalAddressSelect from "cruds/common/select-address";
 import { MODULE_MASTER } from "utils/constant";
 
 const NewItem = () => {

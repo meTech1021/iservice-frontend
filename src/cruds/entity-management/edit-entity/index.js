@@ -33,7 +33,7 @@ import { useNavigate,useParams } from "react-router-dom";
 import { Autocomplete, Menu, MenuItem } from "@mui/material";
 import { MODULE_MASTER } from "utils/constant"
 import CrudService from "services/cruds-service";
-import ModalModuleAddress from "cruds/address-management/module";
+import ModalModuleAddress from "../add-module";
 import { ToastContainer, toast } from 'react-toastify';
 import 'material-react-toastify/dist/ReactToastify.css';
 import ModalContact from "../add-contact";

@@ -131,14 +131,17 @@ function MonitorManagement() {
   const getRows = (info) => {
     let updatedInfo = info.map((row) => {
       console.log(row, 'row')
-      const deviceNames = row.attributes?.DeviceMonitorAssociations.map(device => device.Device.name);
+      const deviceNames = row.attributes?.devices.map(device => device.Device.name);
       const combinedDeviceNames = deviceNames?.join(', ');
+      const count = row.attributes?.devices.length;
+      const frequency = 'Every ' + row.attributes?.frequency + ' ' + row.attributes?.time_unit +
+      (parseInt(row.attributes?.frequency) > 1 ? '(s)' : '');
       return {
         type: "monitors",
         id: row.id,
         name: row.attributes?.name,
-        frequency: row.attributes?.frequency,
-        device: combinedDeviceNames,
+        frequency: frequency,
+        count: count,
 
         status: (
           <Badge
@@ -160,7 +163,7 @@ function MonitorManagement() {
       { Header: "Status", accessor: "status", width: "15%" },
       { Header: "Monitor Name", accessor: "name", width: "15%" },
       { Header: "Frequency", accessor: "frequency", width: "15%" },
-      { Header: "Device", accessor: "device", width: "15%" },
+      { Header: "Count", accessor: "count", width: "15%" },
       {
         Header: "actions",
         disableSortBy: true,

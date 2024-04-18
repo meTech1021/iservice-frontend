@@ -29,7 +29,7 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import FormField from "layouts/applications/wizard/components/FormField";
-import ModalAddress from "cruds/address-management";
+import ModalAddress from "cruds/common/add-address";
 import { useNavigate } from "react-router-dom";
 import { MODULE_MASTER } from "utils/constant"
 import { jwtDecode } from 'jwt-decode';

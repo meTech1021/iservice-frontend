@@ -18,7 +18,7 @@ import { useState, useEffect } from "react";
 // @mui material components
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
-import { Autocomplete, Tooltip, IconButton } from "@mui/material";
+import { Autocomplete, Tooltip, IconButton, Typography } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 // Material Dashboard 2 PRO React components
@@ -37,6 +37,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import CrudService from "services/cruds-service";
 import { MODULE_MASTER } from "utils/constant";
 import DataTable from "examples/Tables/DataTable";
+import ModalMultiSelect from "../select-device";
 
 const EditMonitorDevice = () => {
     const { id } = useParams();
@@ -57,27 +58,25 @@ const EditMonitorDevice = () => {
 
     const [device, setDevice] = useState([]);
     const [devices, setDevices] = useState([]);
+    const [tempDevices, setTempDevices] = useState([]);     // this is to dispaly temp in data table of modal
     const [comparisonOperators, setComparisonOperators] = useState([]);
     const [thresholdTypes, setThresholdTypes] = useState([]);
 
-    const [deviceParameters, setDeviceParameters] = useState([{label: "Select All", value: "all"}]);
+    const [deviceParameters, setDeviceParameters] = useState([]);
+    const [tempDeviceThresholds, setTempDeviceThresholds] = useState([]);       // temp data to be displayed in data table of modal
+    const [selectedThresholds, setSelectedThresholds] = useState([]);
+
+    const [tempDeviceParameters, setTempDeviceParameters] = useState([]);       // temp data to be displayed in data table of modal
     const [selectedParameters, setSelectedParameters] = useState([]);
-    
+
     const [statusType, setStatusType] = useState([]);
     const [statusDevice, setStatusDevice] = useState([]);
 
-    useEffect(() => {
-        (async () => {
-            try {
-                const response = await CrudService.getInternalDevices();
-                setDevices(response.data);
-                console.log(response.data, 'devicesss')
-            } catch (err) {
-                console.error(err);
-                return null;
-            }
-        })();
+    const [selectedDeviceRows, setSelectedDeviceRows] = useState([]);
+    const [selectedThreRows, setSelectedThreRows] = useState([]);
+    const [selectedParameterRows, setSelectedParameterRows] = useState([]);
 
+    useEffect(() => {
         (async () => {
             try {
                 const response = await CrudService.getStatusTypes(MODULE_MASTER.DEVICES);
@@ -88,19 +87,6 @@ const EditMonitorDevice = () => {
             }
         })();
 
-        (async () => {
-            try {
-                const response = await CrudService.getDeviceParameters();
-                const parametersWithSelectAll = [
-                    { label: "Select All", value: "all" },
-                    ...response.data
-                ];
-                setDeviceParameters(parametersWithSelectAll);
-            } catch (err) {
-                console.error(err);
-                return null;
-            }
-        })();
 
         (async () => {
             try {
@@ -127,33 +113,90 @@ const EditMonitorDevice = () => {
         if (!id) return;
         (async () => {
           try {
+            const responseDeviceParams = await CrudService.getDeviceParameters();
+            setDeviceParameters(responseDeviceParams.data);
+
+            const responseDevices = await CrudService.getInternalRestDevices();
+            setDevices(responseDevices.data);
+
             const res = await CrudService.getDeviceMonitor(id);
             setName({ ...name, text: res.data.attributes?.name });
             setFrequency({ ...frequency, text: res.data.attributes?.frequency });
-            console.log(res.data, 'res.data.attributes?.time_unit')
             setTimeUnit(res.data.attributes?.time_unit)
-            const deviceArray = res.data.attributes?.DeviceMonitorAssociations.map((device) => ({
+
+            const deviceArray = res.data.attributes?.devices.map((device) => ({
                 ...device,
                 attributes: device?.Device
             }));
-            
+
             setDevice(deviceArray);
+            const restDevices = responseDevices.data.filter(param => !deviceArray.some(deviceArray => deviceArray.device_id === param.id));
+            setTempDevices(restDevices);
+            
             setStatusType({attributes: {StatusType: res.data.attributes?.StatusOption?.StatusType}});
+            const newDeviceThresholds = res.data.included.deviceThresholds.map((threshold) => ({
+                ...threshold,
+                label: threshold?.DeviceParameter?.parameter_name,
+                parameter_name: threshold?.DeviceParameter?.parameter_name,
+                is_threshold_required: threshold?.DeviceParameter?.is_threshold_required,
+                field_type_id: threshold?.DeviceParameter?.field_type_id
+            }));
+            setSelectedThresholds(newDeviceThresholds)
+
+            const restThresholds = responseDeviceParams.data.filter(param => !newDeviceThresholds.some(newDeviceThreshold => newDeviceThreshold.parameter_id === param.parameter_id));
+            setTempDeviceThresholds(restThresholds.filter(item => item.is_threshold_required === true));
+
             const newDeviceParameters = res.data.included.deviceParameters.map((parameter) => ({
                 ...parameter,
-                label: parameter?.DeviceParameter?.parameter_name,
                 parameter_name: parameter?.DeviceParameter?.parameter_name,
+                label: parameter?.DeviceParameter?.label,
                 is_threshold_required: parameter?.DeviceParameter?.is_threshold_required,
-                field_type_id: parameter?.DeviceParameter?.field_type_id
+                tooltip: parameter?.DeviceParameter?.tooltip,
+                DeviceParameterType: parameter?.DeviceParameter?.DeviceParameterType,
+                ApiName: parameter?.DeviceParameter?.ApiName,
+
             }));
             setSelectedParameters(newDeviceParameters)
-            
+
+            const restParams = responseDeviceParams.data.filter(param => !newDeviceParameters.some(newDeviceParameter => newDeviceParameter.parameter_id === param.parameter_id));
+            console.log(newDeviceParameters, 'newDeviceParameters')
+            setTempDeviceParameters(restParams);
+    
           } catch (err) {
             console.error(err);
           }
         })();
-      }, [id]);
+    }, [id]);
 
+    useEffect(() => {
+        const filteredDevices = devices.filter(device => selectedDeviceRows.includes(device.id));
+        const updatedDevice = [...device, ...filteredDevices];
+        console.log(updatedDevice, filteredDevices, devices, 'updatedDevice')
+        setDevice(updatedDevice);
+
+        const restDevices = devices.filter(param => !updatedDevice.some(updatedDevice => updatedDevice.device_id === param.id));
+        setTempDevices(restDevices);
+    }, [selectedDeviceRows]);
+
+    useEffect(() => {
+        const filteredThresholds = deviceParameters.filter(param => selectedThreRows.includes(param.parameter_id));
+        const updatedThresholds = [...selectedThresholds, ...filteredThresholds];
+        setSelectedThresholds(updatedThresholds);
+
+        const restThresholds = deviceParameters.filter(threshold => !updatedThresholds.some(updatedThreshold => updatedThreshold.parameter_id === threshold.parameter_id));
+        setTempDeviceThresholds(restThresholds);
+    }, [selectedThreRows]);
+
+    useEffect(() => {
+        const filteredParams = deviceParameters.filter(param => selectedParameterRows.includes(param.parameter_id));
+        const updatedParameters = [...selectedParameters, ...filteredParams];
+        setSelectedParameters(updatedParameters);
+
+        const restParams = deviceParameters.filter(param => !updatedParameters.some(updatedParam => updatedParam.parameter_id === param.parameter_id));
+        setTempDeviceParameters(restParams);
+    }, [selectedParameterRows]);
+
+      
     const changeNameHandler = (e) => {
         setName({ ...name, text: e.target.value });
     };
@@ -162,6 +205,234 @@ const EditMonitorDevice = () => {
         setFrequency({ ...frequency, text: e.target.value });
     };
 
+    const removeParameter = (index) => {
+        const updatedParameters = [...selectedParameters];
+        updatedParameters.splice(index, 1);
+        setSelectedParameters(updatedParameters);
+        
+        const restParams = deviceParameters.filter(param => !updatedParameters.some(updatedParam => updatedParam.parameter_id === param.parameter_id));
+        setTempDeviceParameters(restParams);
+    }
+
+    const removeThreshold = (index) => {
+        const updatedThresholds = [...selectedThresholds];
+        updatedThresholds.splice(index, 1);
+        setSelectedThresholds(updatedThresholds);
+        
+        const restParams = deviceParameters.filter(threshold => !updatedThresholds.some(updatedParam => updatedParam.parameter_id === threshold.parameter_id));
+        setTempDeviceThresholds(restParams);
+    }
+
+    const removeDevice = (index) => {
+        const updatedDevice = [...device]
+        updatedDevice.splice(index, 1);
+        setDevice(updatedDevice);
+
+        const restDevices = devices.filter(param => !updatedDevice.some(updatedDevice => updatedDevice.device_id === param.device_id));
+        setTempDevices(restDevices);
+    }
+    
+    const getRows = () => {
+        return selectedThresholds.map((row, index) => {
+            const fields = [
+                {
+                    parameter_name: row.parameter_name
+                }
+            ];
+
+            if (row?.is_threshold_required) {
+                fields.push(
+                    {
+                        threshold_type: (
+                            <Autocomplete
+                                defaultValue={row?.DeviceMonitorThresholdType || null}
+                                options={thresholdTypes}
+                                getOptionLabel={(option) => (option ? option.threshold_name : "")}
+                                onChange={(event, NewThresholdType) => {
+                                    handlethresholdTypeChange(index, NewThresholdType);
+                                }}
+                                style={{ width: "140px" }}  
+                                renderInput={(params) => (
+                                    <FormField {...params} label="Type" InputLabelProps={{ shrink: true }} required />
+                                )}
+                            />
+                        ),
+                        threshold_value: (
+                            <MDBox>
+                                <FormField
+                                    required
+                                    value={row.threshold_value}
+                                    label="Value"
+                                    onChange={(e) => handlethresholdValueChange(index, e.target.value)}
+                                />
+                                {row?.validationError && <div style={{ color: 'red' }}>{row?.validationError}</div>}
+                            </MDBox>
+                        ),    
+                        comparison_operator: (
+                            <Autocomplete
+                                defaultValue={row.ComparisonOperator || null}
+                                options={comparisonOperators}
+                                getOptionLabel={(option) => (option ? option.comparison_operator : "")}
+                                onChange={(event, NewComparisonOperator) => {
+                                    handleThresholdOperatorChange(index, NewComparisonOperator);
+                                }}
+                                style={{ width: "80px" }}  
+                                renderInput={(params) => (
+                                    <FormField {...params} label="Operator" InputLabelProps={{ shrink: true }} required />
+                                )}
+                            />
+                        ),
+                        alert_enabled: (
+                            <Checkbox
+                                checked={row?.alert_enabled}
+                                onChange={(e) => handlealertEnabledChange(index, e.target.checked)}
+                            />
+                        )
+                    }
+                );
+            }
+
+            return Object.assign({}, ...fields);
+        });
+    };
+
+    const tableThresholdData = {
+        columns: [
+            { Header: "Parameter Name", accessor: "parameter_name" },
+            { Header: "Threshold Type", accessor: "threshold_type" },
+            { Header: "Comparison Operator", accessor: "comparison_operator" },
+            { Header: "Threshold Value", accessor: "threshold_value" },
+            {
+                Header: "Alert Enabled",
+                accessor: 'alert_enabled'
+            },
+            {
+                Header: "actions",
+                disableSortBy: true,
+                accessor: "",
+                Cell: (info) => {
+                  return (
+                    <MDBox display="flex" alignItems="center">
+                      {(
+                        <Tooltip title="Delete Parameter">
+                          <IconButton onClick={() => removeThreshold(info.cell.row.index)}>
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                    </MDBox>
+                  );
+                },
+            }
+        ],
+        rows: getRows(),
+    };
+
+    const getParameterRows = (info) => {
+        let updatedInfo = info.map((row) => {
+            return {
+                id: row.parameter_id,
+                name: row.parameter_name,
+                type: row.DeviceParameterType?.type_name,
+                label: row.label,
+                tooltip: row.tooltip,
+                api_name: row.AplName?.api_name,
+                is_allowed: row.is_threshold_required ? "True" : "False",  
+            };
+        });
+        return updatedInfo;
+    }
+
+
+    const tableParameterData = {
+        columns: [
+            { Header: "ID", accessor: "id" },
+            { Header: "Parameter Name", accessor: "name" },
+            { Header: "Type", accessor: "type" },
+            { Header: "Label", accessor: "label" },
+            { Header: "Tool Tip", accessor: "tooltip" },
+            { Header: "API Name", accessor: "api_name" },
+            { Header: "Threshold Allowed", accessor: "is_allowed" },
+            {
+                Header: "actions",
+                disableSortBy: true,
+                accessor: "",
+                Cell: (info) => {
+                  return (
+                    <MDBox display="flex" alignItems="center">
+                      {(
+                        <Tooltip title="Delete Parameter">
+                          <IconButton onClick={() => removeParameter(info.cell.row.index)}>
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                    </MDBox>
+                  );
+                },
+            }
+        ],
+        rows: getParameterRows(selectedParameters),
+    };
+
+    const getDeviceRows = (info) => {
+        let updatedInfo = info.map((row) => {
+            return {
+                id: row.attributes?.device_id,
+                status: row.attributes?.StatusOption,
+                name: row.attributes?.name,
+                type: row.attributes?.DeviceType?.type_name,
+                brand: row.attributes?.DeviceBrand?.brand_name,
+                model: row.attributes?.DeviceModel?.model_name,
+                entity: row.attributes?.EntityAddressItem?.Entity?.name,
+                item: row.attributes?.EntityAddressItem?.Item?.name,  
+
+            };
+        });
+        return updatedInfo;
+    }
+
+    const tableDeviceData = {
+        columns: [
+          { Header: "ID", accessor: "id", width: "5%" },
+          { Header: "name", accessor: "name", width: "20%" },
+          { Header: "type", accessor: "type", width: "15%" },
+          { Header: "brand", accessor: "brand", width: "15%" },
+          { Header: "model", accessor: "model", width: "15%" },
+          { Header: "entity", accessor: "entity", width: "15%" },
+          { Header: "item", accessor: "item", width: "15%" },
+          {
+            Header: "actions",
+            disableSortBy: true,
+            accessor: "",
+            Cell: (info) => {
+              return (
+                <MDBox display="flex" alignItems="center">
+                    <Tooltip title="Delete Device">
+                        <IconButton onClick={() => removeDevice(info.cell.row.index)}>
+                            <DeleteIcon />
+                        </IconButton>
+                    </Tooltip>
+                </MDBox>
+              );
+            },
+          },
+        ],
+    
+        rows: getDeviceRows(device),
+    };
+
+    const getParamRows = (info) => {
+        let updatedInfo = info.map((row) => {
+            return {
+                id: row.parameter_id,
+                name: row.label,
+                type: row.FieldType?.name,
+            };
+        });
+        return updatedInfo;
+    }
+    
     const validateInput = (field_type_id, value) => {
         switch (field_type_id) {
             case 2:
@@ -213,149 +484,45 @@ const EditMonitorDevice = () => {
         // If validation passes
         return null;
     };
-
-    const removeParameter = (index) => {
-        const updatedParameters = [...selectedParameters];
-        updatedParameters.splice(index, 1);
-        setSelectedParameters(updatedParameters);
-    }
-
-    const getRows = () => {
-        return selectedParameters.map((row, index) => {
-            const fields = [
-                {
-                    parameter_name: row.parameter_name
-                }
-            ];
-
-            if (row?.is_threshold_required) {
-                fields.push(
-                    {
-                        threshold_type: (
-                            <Autocomplete
-                                defaultValue={row?.DeviceMonitorThresholdType || null}
-                                options={thresholdTypes}
-                                getOptionLabel={(option) => (option ? option.threshold_name : "")}
-                                onChange={(event, NewThresholdType) => {
-                                    handlethresholdTypeChange(index, NewThresholdType);
-                                }}
-                                style={{ width: "140px" }}  
-                                renderInput={(params) => (
-                                    <FormField {...params} label="Type" InputLabelProps={{ shrink: true }} required />
-                                )}
-                            />
-                        ),
-                        threshold_value: (
-                            <MDBox>
-                                <FormField
-                                    required
-                                    value={row.threshold_value}
-                                    label="Value"
-                                    onChange={(e) => handlethresholdValueChange(index, e.target.value)}
-                                />
-                                {row?.validationError && <div style={{ color: 'red' }}>{row?.validationError}</div>}
-                            </MDBox>
-                        ),    
-                        comparison_operator: (
-                            <Autocomplete
-                                defaultValue={row.ComparisonOperator || null}
-                                options={comparisonOperators}
-                                getOptionLabel={(option) => (option ? option.comparison_operator : "")}
-                                onChange={(event, NewComparisonOperator) => {
-                                    handleThresholdOperatorChange(index, NewComparisonOperator);
-                                }}
-                                style={{ width: "80px" }}  
-                                renderInput={(params) => (
-                                    <FormField {...params} label="Operator" InputLabelProps={{ shrink: true }} required />
-                                )}
-                            />
-                        ),
-                        alert_enabled: (
-                            <Checkbox
-                                checked={row.alert_enabled}
-                                onChange={(e) => handlealertEnabledChange(index, e.target.checked)}
-                            />
-                        )
-                    }
-                );
-            }
-
-            return Object.assign({}, ...fields);
-        });
-    };
-
-    const dataTableData = {
-        columns: [
-            { Header: "Parameter Name", accessor: "parameter_name" },
-            { Header: "Threshold Type", accessor: "threshold_type" },
-            { Header: "Comparison Operator", accessor: "comparison_operator" },
-            { Header: "Threshold Value", accessor: "threshold_value" },
-            {
-                Header: "Alert Enabled",
-                accessor: 'alert_enabled'
-            },
-            {
-                Header: "actions",
-                disableSortBy: true,
-                accessor: "",
-                Cell: (info) => {
-                  return (
-                    <MDBox display="flex" alignItems="center">
-                      {(
-                        <Tooltip title="Delete Parameter">
-                          <IconButton onClick={() => removeParameter(info.cell.row.index)}>
-                            <DeleteIcon />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-                    </MDBox>
-                  );
-                },
-            }
-        ],
-        rows: getRows(),
-    };
-
+    
     const handlethresholdTypeChange = (index, NewThresholdType) => {
-        const updatedDataTable = [...selectedParameters];
+        const updatedDataTable = [...selectedThresholds];
         updatedDataTable[index].threshold_type_id = NewThresholdType?.id;
-        setSelectedParameters(updatedDataTable);
+        setSelectedThresholds(updatedDataTable);
     };
 
     const handlethresholdValueChange = (index, value) => {
-        const updatedDataTable = [...selectedParameters];
+        const updatedDataTable = [...selectedThresholds];
         updatedDataTable[index].threshold_value = value;
-        setSelectedParameters(updatedDataTable);
+        setSelectedThresholds(updatedDataTable);
     };
 
     const handleThresholdOperatorChange = (index, NewComparisonOperator) => {
-        const updatedDataTable = [...selectedParameters];
+        const updatedDataTable = [...selectedThresholds];
         updatedDataTable[index].comparison_operator_id = NewComparisonOperator?.id;
-        setSelectedParameters(updatedDataTable);
+        setSelectedThresholds(updatedDataTable);
     };
 
     const handlealertEnabledChange = (index, value) => {
-        const updatedDataTable = [...selectedParameters];
+        const updatedDataTable = [...selectedThresholds];
         updatedDataTable[index].alert_enabled = value;
-        setSelectedParameters(updatedDataTable);
+        setSelectedThresholds(updatedDataTable);
     };
 
     const submitHandler = async (e) => {
         e.preventDefault();
         let hasValidationError = false;
-        const updatedSelectedParameters = [...selectedParameters];
-        updatedSelectedParameters.forEach(updatedSelectedParameter => {
-            const validError = validateInput(updatedSelectedParameter?.field_type_id, updatedSelectedParameter?.threshold_value)
-            console.log(validError, 'validError')
-            updatedSelectedParameter.validationError = validError;
+        const updatedSelectedThresholds = [...selectedThresholds];
+        updatedSelectedThresholds.forEach(updatedSelectedThreshold => {
+            const validError = validateInput(updatedSelectedThreshold?.field_type_id, updatedSelectedThreshold?.threshold_value)
+            updatedSelectedThreshold.validationError = validError;
             if (validError) {
                 hasValidationError = validError;
                 return;
             }    
         })
-        console.log(hasValidationError,updatedSelectedParameters, 'hasValidationError')
 
-        setSelectedParameters(updatedSelectedParameters);
+        setSelectedThresholds(updatedSelectedThresholds);
 
         if(hasValidationError)
             return;
@@ -369,7 +536,8 @@ const EditMonitorDevice = () => {
                     devices: device,
                     timeUnit: timeUnit,
                     statusType: statusType?.attributes,
-                    deviceParameters: selectedParameters
+                    deviceParameters: selectedParameters,
+                    deviceParameterThresholds: selectedThresholds
                 }
             },
         };
@@ -450,7 +618,7 @@ const EditMonitorDevice = () => {
                                         )}
                                     </MDBox>
                                     
-                                    <Autocomplete
+                                    {/* <Autocomplete
                                         multiple
                                         disableCloseOnSelect
                                         defaultValue={[]}
@@ -465,7 +633,7 @@ const EditMonitorDevice = () => {
                                         renderInput={(params) => (
                                             <FormField {...params} label="Device" InputLabelProps={{ shrink: true }} />
                                         )}
-                                    />
+                                    /> */}
 
                                     <Autocomplete
                                         defaultValue=""
@@ -481,26 +649,15 @@ const EditMonitorDevice = () => {
                                         )}
                                     />    
 
-                                    <Autocomplete
-                                        multiple
-                                        disableCloseOnSelect
-                                        defaultValue={selectedParameters}
-                                        options={deviceParameters}
-                                        getOptionLabel={(option) => (option ? option.label : "")}
-                                        value={selectedParameters}
-                                        onChange={(event, newParameter) => {
-                                            if (newParameter.some((option) => option.value === "all")) {
-                                                setSelectedParameters(deviceParameters.filter((option) => option.value !== "all"));
-                                            } else {
-                                                setSelectedParameters(newParameter);
-                                            }
-                                        }}
-                                        renderInput={(params) => (
-                                            <FormField {...params} label="Parameter" InputLabelProps={{ shrink: true }}  />
-                                        )}
-                                    />    
+                                    <ModalMultiSelect rowData={getDeviceRows(tempDevices)} selectedRows={selectedDeviceRows} setSelectedRows={setSelectedDeviceRows} label="Devices"/>                                    
+                                    <DataTable table={tableDeviceData} canSearch={true} />
 
-                                    <DataTable table={dataTableData} canSearch={true} />
+                                    <ModalMultiSelect rowData={getParameterRows(tempDeviceParameters)} selectedRows={selectedParameterRows} setSelectedRows={setSelectedParameterRows} label="Parameters"/>                                    
+                                    <DataTable table={tableParameterData} canSearch={true} />
+                                    
+                                    <ModalMultiSelect rowData={getParamRows(tempDeviceThresholds)} selectedRows={selectedThreRows} setSelectedRows={setSelectedThreRows} label="Thresholds"/>
+                                    <DataTable table={tableThresholdData} canSearch={true} />
+
                                     <MDBox ml="auto" mt={4} mb={2} display="flex" justifyContent="flex-end">
                                         <MDBox mx={2}>
                                             <MDButton

@@ -32,12 +32,11 @@ const MultiSelectDataTable = ({rowData, selectedRows, setSelectedRows}) => {
     };
   
     // Custom rendering for the status field
-    if (key === 'StatusType') {
+    if (key === 'StatusType' || key === 'status') {
         column.headerName = 'Status';
         column.renderCell = (params) => {
-            const status = params.row.StatusType?.StatusType?.status_name;
-            const badge = params.row.StatusType?.BadgeDetail;
-            console.log(params, 'params')
+            const status = params.row.status?.StatusType?.status_name;
+            const badge = params.row.status?.BadgeDetail;
 
             return (
                 <Badge

@@ -32,8 +32,10 @@ import Footer from "examples/Footer";
 import DataTable from "examples/Tables/DataTable";
 import MDAlert from "components/MDAlert";
 import { Tooltip, IconButton, CardContent, Typography } from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@material-ui/core';
 
 import SyncIcon from '@mui/icons-material/Sync';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 import CrudService from "services/cruds-service";
 import { AbilityContext } from "Can";
@@ -52,7 +54,9 @@ function ExternalDeviceManagement() {
     text: "",
   });
   const [openModal, setOpenModal] = useState(false);
+  const [openViewModal, setOpenViewModal] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
+  const [paramTableData, setParamTableData] = useState();
 
   useEffect(() => {
     (async () => {
@@ -92,8 +96,25 @@ function ExternalDeviceManagement() {
     setOpenModal(true);
   };
 
+  const clickViewHandler = (id, value) => {
+    setOpenViewModal(true);
+    const filteredValue = Object.keys(value).reduce((acc, key) => {
+      if (key !== 'map_status') {
+        acc[key] = value[key];
+      }
+      return acc;
+    }, {});
+  
+    // Set the filtered data in the state
+    setParamTableData(filteredValue);
+  }
+
   const handleClose = () => {
     setOpenModal(false);
+  };
+
+  const handleViewClose = () => {
+    setOpenViewModal(false);
   };
 
   const getRows = (info) => {
@@ -151,28 +172,7 @@ function ExternalDeviceManagement() {
       { Header: "Map Status", accessor: "map_status" },
       { Header: "Device Name", accessor: "devicename"},
       { Header: "Version", accessor: "version" },
-      { Header: "Latitude", accessor: "lat" },
-      { Header: "Longitude", accessor: "lng" },
-      { Header: "Address", accessor: "address" },
-      { Header: "Units", accessor: "units" },
-      { Header: "reported", accessor: "reported" },
-      { Header: "tx_reported", accessor: "tx_reported" },
-      { Header: "last_updated_on", accessor: "last_updated_on" },
-      { Header: "wifi_signal", accessor: "wifi_signal" },
-      { Header: "tx_signal", accessor: "tx_signal" },
-      { Header: "is_premium", accessor: "is_premium" },
-      { Header: "Percent Level", accessor: "percent_level" },
-      { Header: "Battery Voltage", accessor: "battery_voltage" },
-      { Header: "Battery Status", accessor: "battery_status" },
-      { Header: "Volume Level", accessor: "volume_level" },
-      { Header: "Inch Level", accessor: "inch_level" },
-      { Header: "Depth", accessor: "depth" },
-      { Header: "Power X", accessor: "power_x" },
-      { Header: "Power Y", accessor: "power_y" },
-      { Header: "Power Z", accessor: "power_z" },
-      { Header: "Shape", accessor: "shape" },
-      { Header: "Diameter", accessor: "diameter" },
-      { Header: "Length", accessor: "length" },
+
       {
         Header: "actions",
         disableSortBy: true,
@@ -180,6 +180,13 @@ function ExternalDeviceManagement() {
         Cell: (info) => {
           return (
             <MDBox display="flex" alignItems="center">
+              {ability.can("edit", "devices")  && (
+                <Tooltip title="Sync Devoce">
+                  <IconButton onClick={() => clickViewHandler(info.cell.row.original.id, info.cell.row.original)}>
+                    <VisibilityIcon />
+                  </IconButton>
+                </Tooltip>
+              )}
               {ability.can("edit", "devices") && (info.cell.row.original.status_type_id === 20) && (
                 <Tooltip title="Sync Devoce">
                   <IconButton onClick={() => clickSyncHandler(info.cell.row.original.id)}>
@@ -195,6 +202,52 @@ function ExternalDeviceManagement() {
 
     rows: tableData,
   };
+
+  const renderTableCell = (data) => {
+    // If the data is an object (JSON), render each key-value pair
+    if (typeof data === 'object' && data !== null) {
+        return (
+          <Table>
+            <TableBody>
+                {Object.entries(data).map(([key, value]) => (
+                  <TableRow key={key}>
+                      <TableCell>{key}</TableCell>
+                      <TableCell>{renderTableCell(value)}</TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        );
+    }
+    return data;
+};
+
+  const DynamicDataTable = (DeviceData) => {
+    // Parse JSON data and extract keys for table columns
+    const columns = Object.keys(DeviceData);
+  
+    return (
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              {columns.map((column) => (
+                <TableCell key={column}>{column}</TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              {columns.map((column) => (
+                <TableCell key={column}>{renderTableCell(DeviceData[column])}</TableCell>
+              ))}
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+    );
+};
+
 
   return (
     <DashboardLayout>
@@ -230,11 +283,41 @@ function ExternalDeviceManagement() {
                     backgroundColor: 'white',
                     boxShadow: 24,
                     p: 4,
+                    maxHeight: '70vh', // Set max height to enable scrolling
+                    overflowY: 'auto',    
+                    overflowX: 'hidden'                                          
                 }}
               >
                 <CardContent>                 
                   <Typography>Map Device</Typography>
                   <MapDevice setOpen={setOpenModal} mapData={mapData} data={data} setData={setData} />
+                </CardContent>
+              </Card>
+            </Modal>
+
+            <Modal  
+                open={openViewModal}
+                onClose={handleViewClose}
+                aria-labelledby="modal-title"
+                aria-describedby="modal-description"
+            >
+              <Card
+                sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '80%', // Set the desired width here
+                    backgroundColor: 'white',
+                    boxShadow: 24,
+                    p: 4,
+                    maxHeight: '70vh', // Set max height to enable scrolling
+                    overflowY: 'auto',    
+                    overflowX: 'hidden'                                          
+                }}
+              >
+                <CardContent>                 
+                  <DynamicDataTable DeviceData={paramTableData} />
                 </CardContent>
               </Card>
             </Modal>

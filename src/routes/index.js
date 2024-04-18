@@ -90,6 +90,8 @@ import ContactManagement from "cruds/contact-management";
 import APIManagement from "cruds/api-management";
 import ExternalDeviceManagement from "cruds/device-management/external-device-management";
 import MonitorManagement from "cruds/device-management/monitor-management";
+import ExternalParameterManagement from "cruds/api/mapping";
+import InternalParameterManagement from "cruds/api/mapping/internal-parameter";
 
 const routes = [
   {
@@ -130,11 +132,31 @@ const routes = [
     icon: <FontAwesomeIcon icon={faUser} size="sm" />,
     collapse: [
       {
-        name: "API Credentials",
+        name: "API",
         key: "api-management",
-        route: "/api-management",
-        component: <APIManagement />,
-        type: "apis",
+        collapse: [
+          {
+            name: "API Credentials",
+            key: "apiCredentials",
+            route: "/api-management",
+            component: <APIManagement />,
+            type: "apiCredentials",    
+          },
+          {
+            name: "External Parameters",
+            key: "external-paramter-management",
+            route: "/external-paramter-management",
+            component: <ExternalParameterManagement />,
+            type: "parameters",    
+          },
+          {
+            name: "Internal Parameters",
+            key: "internal-parameter-management",
+            route: "/internal-parameter-management",
+            component: <InternalParameterManagement />,
+            type: "parameters",    
+          },
+        ]
       },
       {
         name: "Companies",
@@ -215,7 +237,7 @@ const routes = [
         // type: "entities",
       }]
   },
-  { type: "divider", key: "divider-2" },
+  { type: "divider", key: "divider-3" },
   {
     type: "collapse",
     name: "Contacts",
@@ -230,7 +252,7 @@ const routes = [
         // type: "contacts",
       }]
   },
-  { type: "divider", key: "divider-3" },
+  { type: "divider", key: "divider-4" },
   {
     type: "collapse",
     name: "Event Logs",
@@ -246,7 +268,7 @@ const routes = [
       }]
   },
 
-  { type: "divider", key: "divider-4" },
+  { type: "divider", key: "divider-5" },
   {
     type: "collapse",
     name: "Dashboards",
@@ -495,7 +517,7 @@ const routes = [
       },
     ],
   },
-  { type: "divider", key: "divider-5" },
+  { type: "divider", key: "divider-6" },
   { type: "title", title: "Docs", key: "title-docs" },
   {
     type: "collapse",

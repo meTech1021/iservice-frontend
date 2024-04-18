@@ -34,7 +34,7 @@ import FormField from "layouts/applications/wizard/components/FormField";
 import { useNavigate, useParams } from "react-router-dom";
 
 import CrudService from "services/cruds-service";
-import ModalContactAddressSelect from "cruds/address-management/contact";
+import ModalContactAddressSelect from "cruds/common/contact";
 import { MODULE_MASTER } from "utils/constant";
 
 const EditContact = () => {

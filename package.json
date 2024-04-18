@@ -5,13 +5,6 @@
   "author": "Creative Tim",
   "license": "See license in https://www.creative-tim.com/license",
   "description": "React version of Material Dashboard 2 PRO by Creative Tim",
-  "bugs": {
-    "url": "https://github.com/creativetimofficial/ct-material-dashboard-pro-react/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/creativetimofficial/ct-material-dashboard-pro-react.git"
-  },
   "engines": {
     "node": "14 || 15 || 16 || 18",
     "npm": ">=6"

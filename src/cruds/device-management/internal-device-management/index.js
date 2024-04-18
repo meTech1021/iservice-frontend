@@ -121,7 +121,7 @@ function InternalDeviceManagement() {
       if (err.hasOwnProperty("errors")) {
         setNotification({
           value: true,
-          text: err.errors[0].title,
+          text: err.errors[0].detail,
         });
       }
       return null;
@@ -192,6 +192,7 @@ function InternalDeviceManagement() {
     });
     return updatedInfo;
   };
+
 
   const dataTableData = {
     columns: [

@@ -18,13 +18,14 @@ import { useState, useEffect } from "react";
 // @mui material components
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
-import { Autocomplete } from "@mui/material";
+import Modal from '@mui/material/Modal';
+import { Autocomplete, Tooltip, IconButton, Tab, Tabs, Typography } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 // Material Dashboard 2 PRO React components
 import MDBox from "components/MDBox";
 import MDButton from "components/MDButton";
 import MDTypography from "components/MDTypography";
-import MDEditor from "components/MDEditor";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@material-ui/core';
 
 // Material Dashboard 2 PRO React examples
@@ -54,13 +55,19 @@ const ViewMonitorDevice = () => {
     const [comparisonOperators, setComparisonOperators] = useState([]);
     const [thresholdTypes, setThresholdTypes] = useState([]);
 
-    const [deviceParameters, setDeviceParameters] = useState([{label: "Select All", value: "all"}]);
+    const [deviceParameters, setDeviceParameters] = useState([]);
+    const [selectedThresholds, setSelectedThresholds] = useState([]);
     const [selectedParameters, setSelectedParameters] = useState([]);
     
     const [statusType, setStatusType] = useState([]);
     const [statusDevice, setStatusDevice] = useState([]);
 
     const [deviceParameterValues, setDeviceParameterValues] = useState([]);
+    
+    const [open, setOpen] = useState(false);
+    const [paramTableData, setParamTableData] = useState();
+    const [selectedTab, setSelectedTab] = useState(0);
+
     useEffect(() => {
         (async () => {
             try {
@@ -86,11 +93,7 @@ const ViewMonitorDevice = () => {
         (async () => {
             try {
                 const response = await CrudService.getDeviceParameters();
-                const parametersWithSelectAll = [
-                    { label: "Select All", value: "all" },
-                    ...response.data
-                ];
-                setDeviceParameters(parametersWithSelectAll);
+                setDeviceParameters(response.data);
             } catch (err) {
                 console.error(err);
                 return null;
@@ -101,7 +104,6 @@ const ViewMonitorDevice = () => {
             try {
                 const response = await CrudService.getDeviceParameterValues(id);
                 setDeviceParameterValues(response.data);
-                console.log(response.data, '+++')
             } catch (err) {
                 console.error(err);
                 return null;
@@ -137,7 +139,7 @@ const ViewMonitorDevice = () => {
             const res = await CrudService.getDeviceMonitor(id);
             console.log(res, 'res')
             setName({ ...name, text: res.data.attributes?.name });
-            const deviceArray = res.data.attributes?.DeviceMonitorAssociations.map((device) => ({
+            const deviceArray = res.data.attributes?.devices.map((device) => ({
                 ...device,
                 attributes: device?.Device
             }));
@@ -146,21 +148,80 @@ const ViewMonitorDevice = () => {
             setStatusType({attributes: {StatusType: res.data.attributes?.StatusOption?.StatusType}});
             const newDeviceParameters = res.data.included.deviceParameters.map((parameter) => ({
                 ...parameter,
-                label: parameter?.DeviceParameter?.parameter_name,
                 parameter_name: parameter?.DeviceParameter?.parameter_name,
-                is_threshold_required: parameter?.DeviceParameter?.is_threshold_required
+                label: parameter?.DeviceParameter?.label,
+                is_threshold_required: parameter?.DeviceParameter?.is_threshold_required,
+                tooltip: parameter?.DeviceParameter?.tooltip,
+                DeviceParameterType: parameter?.DeviceParameter?.DeviceParameterType,
+                ApiName: parameter?.DeviceParameter?.ApiName,
+
             }));
             setSelectedParameters(newDeviceParameters)
+
+            const newDeviceThresholds = res.data.included.deviceThresholds.map((threshold) => ({
+                ...threshold,
+                label: threshold?.DeviceParameter?.parameter_name,
+                parameter_name: threshold?.DeviceParameter?.parameter_name,
+                is_threshold_required: threshold?.DeviceParameter?.is_threshold_required,
+                field_type_id: threshold?.DeviceParameter?.field_type_id
+            }));
+            setSelectedThresholds(newDeviceThresholds)
+
             console.log(newDeviceParameters, 'newDeviceParameters')
             
           } catch (err) {
             console.error(err);
           }
         })();
-      }, [id]);
+    }, [id]);
     
+    
+    const handleTabChange = (event, newValue) => {
+        setSelectedTab(newValue);
+    };
+
+    const getDeviceRows = (info) => {
+        let updatedInfo = info.map((row) => {
+            let entityName;
+            if(row.attributes?.EntityAddressItem?.Entity.name)
+              entityName = row.attributes?.EntityAddressItem?.Entity.name;
+            else if(row.attributes?.EntityAddressItem?.Entity.first_name)
+              entityName = row.attributes?.EntityAddressItem?.Entity.first_name + ' ' + row.attributes?.EntityAddressItem?.Entity.last_name;
+      
+            return {
+                id: (
+                    <a href={`/internal-device-management/edit-device/${row.attributes?.device_id}`} target="_blank" rel="noopener noreferrer">
+                      {row.attributes?.device_id}
+                    </a>
+                ),
+                status: row.attributes?.StatusOption,
+                name: row.attributes?.name,
+                type: row.attributes?.DeviceType?.type_name,
+                brand: row.attributes?.DeviceBrand?.brand_name,
+                model: row.attributes?.DeviceModel?.model_name,
+                entity: entityName,
+                item: row.attributes?.EntityAddressItem?.Item?.name,  
+            };
+        });
+        return updatedInfo;
+    }
+
+    const tableDeviceData = {
+        columns: [
+          { Header: "ID", accessor: "id", width: "5%" },
+          { Header: "name", accessor: "name", width: "20%" },
+          { Header: "type", accessor: "type", width: "15%" },
+          { Header: "brand", accessor: "brand", width: "15%" },
+          { Header: "model", accessor: "model", width: "15%" },
+          { Header: "entity", accessor: "entity", width: "15%" },
+          { Header: "item", accessor: "item", width: "15%" },
+        ],
+    
+        rows: getDeviceRows(device),
+    };
+
     const getRows = () => {
-        return selectedParameters.map((row, index) => {
+        return selectedThresholds.map((row, index) => {
             const fields = [
                 {
                     parameter_name: row.parameter_name
@@ -216,7 +277,7 @@ const ViewMonitorDevice = () => {
         });
     };
 
-    const dataTableData = {
+    const tableThresholdData = {
         columns: [
             { Header: "Parameter Name", accessor: "parameter_name" },
             { Header: "Threshold Type", accessor: "threshold_type" },
@@ -230,21 +291,77 @@ const ViewMonitorDevice = () => {
         rows: getRows(),
     };
 
+    const getParameterRows = (info) => {
+        let updatedInfo = info.map((row) => {
+            return {
+                id: row.parameter_id,
+                name: row.parameter_name,
+                type: row.DeviceParameterType?.type_name,
+                label: row.label,
+                tooltip: row.tooltip,
+                api_name: row.AplName?.api_name,
+                is_allowed: row.is_threshold_required ? "True" : "False",  
+            };
+        });
+        return updatedInfo;
+    }
+
+
+    const tableParameterData = {
+        columns: [
+            { Header: "ID", accessor: "id" },
+            { Header: "Parameter Name", accessor: "name" },
+            { Header: "Type", accessor: "type" },
+            { Header: "Label", accessor: "label" },
+            { Header: "Tool Tip", accessor: "tooltip" },
+            { Header: "API Name", accessor: "api_name" },
+            { Header: "Threshold Allowed", accessor: "is_allowed" },
+        ],
+        rows: getParameterRows(selectedParameters),
+    };
+
+    const getLogColumns = (data) => {
+        const columns = Object.keys(data[0] || {}).map((key) => ({
+            Header: key.replace(/_/g, ' '), // Replace underscores with spaces
+            accessor: key,
+        }));
+    
+        // Add the "View" button column at the end
+        columns.push({
+            Header: 'Actions',
+            accessor: 'actions',
+            Cell: ({ row }) => (
+                <MDButton onClick={() => handleView(row.original.index, row.original.value)}>View</MDButton>
+            ),
+        });
+    
+        const filteredColumns = columns.filter((col) => col.accessor !== 'value');
+
+        return filteredColumns;
+    };
+    
+    const tableLogData = (tableData) => {
+        return {
+            columns: getLogColumns(tableData),
+            rows: tableData,
+        };
+    };
+
     const renderTableCell = (data) => {
         // If the data is an object (JSON), render each key-value pair
         if (typeof data === 'object' && data !== null) {
-          return (
-            <Table>
-              <TableBody>
-                {Object.entries(data).map(([key, value]) => (
-                  <TableRow key={key}>
-                    <TableCell>{key}</TableCell>
-                    <TableCell>{renderTableCell(value)}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          );
+            return (
+                <Table>
+                <TableBody>
+                    {Object.entries(data).map(([key, value]) => (
+                    <TableRow key={key}>
+                        <TableCell>{key}</TableCell>
+                        <TableCell>{renderTableCell(value)}</TableCell>
+                    </TableRow>
+                    ))}
+                </TableBody>
+                </Table>
+            );
         }
         return data;
     };
@@ -273,16 +390,34 @@ const ViewMonitorDevice = () => {
             </Table>
           </TableContainer>
         );
-      };
+    };
 
+    const handleView = (id, value) => {
+        setOpen(true);
+        setParamTableData(value);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+    };
+
+    const handleRefreshLog = async () => {
+        try {
+            const response = await CrudService.getDeviceParameterValues(id);
+            setDeviceParameterValues(response.data);                                    
+        } catch (error) {
+            console.error('Error fetching device parameter values:', error);
+            // Handle error if necessary
+        }
+    };
 
     return (
         <DashboardLayout>
             <DashboardNavbar />
             <MDBox mt={5} mb={9}>
-                <Grid container justifyContent="center">
+                <Grid justifyContent="center">
                     <Grid item xs={12} lg={8}>
-                        <MDBox mt={6} mb={8} textAlign="center">
+                        <MDBox mt={6} mb={3} textAlign="center">
                             <MDBox mb={1}>
                                 <MDTypography variant="h3" fontWeight="bold">
                                 Device Monitor {id}
@@ -310,7 +445,7 @@ const ViewMonitorDevice = () => {
                                         </MDTypography>
                                         )}
                                     </MDBox>
-                                    <Autocomplete
+                                    {/* <Autocomplete
                                         multiple
                                         readOnly
                                         defaultValue={[]}
@@ -320,7 +455,7 @@ const ViewMonitorDevice = () => {
                                         renderInput={(params) => (
                                             <FormField {...params} label="Device" InputLabelProps={{ shrink: true }} />
                                         )}
-                                    />
+                                    /> */}
 
                                     <Autocomplete
                                         defaultValue=""
@@ -333,7 +468,7 @@ const ViewMonitorDevice = () => {
                                         )}
                                     />    
 
-                                    <Autocomplete
+                                    {/* <Autocomplete
                                         multiple
                                         readOnly
                                         defaultValue={selectedParameters}
@@ -343,18 +478,88 @@ const ViewMonitorDevice = () => {
                                         renderInput={(params) => (
                                             <FormField {...params} label="Parameter" InputLabelProps={{ shrink: true }}  />
                                         )}
-                                    />    
+                                    />     */}
+                                  
+                                    <MDBox mt={3}>
+                                        <Tabs value={selectedTab} onChange={handleTabChange} aria-label="Tabs">
+                                            <Tab label="Logs" />
+                                            <Tab label="Devices" />
+                                            <Tab label="Parameters" />
+                                            <Tab label="Thresholds" />
+                                        </Tabs>
 
-                                    <DataTable table={dataTableData} canSearch={true} />
-                                    {
-                                    deviceParameterValues.map((deviceParameterValue, index) => (
-                                        <MDBox key={index}>
-                                        {deviceParameterValue.deviceParameterValues.map((innerValue, innerIndex) => (
-                                            <DynamicDataTable key={innerIndex} ParameterData={JSON.parse(innerValue.value)} />
-                                        ))}
-                                        </MDBox>
-                                    ))
-                                    }
+                                        {selectedTab === 0 && (
+                                            <>
+                                            <MDButton 
+                                                variant="gradient"
+                                                color="dark"
+                                                size="small"
+                                                px={2}
+                                                mx={2}
+                                                onClick={handleRefreshLog}
+                                            >
+                                            Refresh        
+                                            </MDButton>
+                                            {
+                                                deviceParameterValues.length > 0 &&
+                                                <DataTable table={tableLogData(deviceParameterValues)} canSearch={true} />
+                                            }
+                                            </>
+                                        )}
+
+                                        {selectedTab === 1 && (
+                                            <>
+                                            {
+                                                device.length > 0 &&
+                                                <DataTable table={tableDeviceData} canSearch={true} />
+                                            }
+                                            </>
+                                        )}
+
+                                        {selectedTab === 2 && (
+                                            <>
+                                            {
+                                                selectedParameters.length > 0 && 
+                                                <DataTable table={tableParameterData} canSearch={true} />
+                                            }
+                                            </>
+                                        )}
+
+                                        {selectedTab === 3 && (
+                                            <>
+                                            {
+                                                selectedThresholds.length > 0 && 
+                                                <DataTable table={tableThresholdData} canSearch={true} />
+                                            }
+                                            </>
+                                        )}
+
+                                    </MDBox>
+                                    <Modal
+                                        open={open}
+                                        onClose={handleClose}
+                                        aria-labelledby="modal-title"
+                                        aria-describedby="modal-description"
+                                    >
+                                        <Card
+                                            sx={{
+                                                position: 'absolute',
+                                                top: '50%',
+                                                left: '50%',
+                                                transform: 'translate(-50%, -50%)',
+                                                width: '80%', // Set the desired width here
+                                                backgroundColor: 'white',
+                                                border: '2px solid #000',
+                                                boxShadow: 24,
+                                                p: 4,
+                                                maxHeight: '70vh', // Set max height to enable scrolling
+                                                overflowY: 'auto',    
+                                                overflowX: 'hidden'                                          
+                                            }}
+                                        >
+                                            <DynamicDataTable ParameterData={paramTableData} />
+                                        </Card>
+                                    </Modal>
                                     <MDBox ml="auto" mt={4} mb={2} display="flex" justifyContent="flex-end">
                                         <MDBox mx={2}>
                                             <MDButton
@@ -364,8 +569,8 @@ const ViewMonitorDevice = () => {
                                             px={2}
                                             mx={2}
                                             onClick={() =>
-                                                navigate("/monitor-management", {
-                                                state: { value: false, text: "" },
+                                                    navigate("/monitor-management", {
+                                                    state: { value: false, text: "" },
                                                 })
                                             }
                                             >
