@@ -37,6 +37,8 @@ import EditMonitorDevice from "cruds/device-management/monitor-management/edit-m
 import ViewMonitorDevice from "cruds/device-management/monitor-management/view-monitor";
 import NewParameter from "cruds/api/mapping/internal-parameter/new-parameter";
 import EditParameter from "cruds/api/mapping/internal-parameter/edit-parameter";
+import NewMessage from "cruds/message-management/new-message";
+import EditMessage from "cruds/message-management/edit-message";
 
 /** 
   All of the routes for the Material Dashboard 2 PRO React are added here,
@@ -206,6 +208,18 @@ const crudRoutes = [
     route: "/internal-parameter-management/edit-parameter/:id",
     component: <EditParameter />,
     type: "parameters",
+  },
+  {
+    key: "new-message",
+    route: "/message-management/new-message",
+    component: <NewMessage />,
+    type: "messages",
+  },
+  {
+    key: "edit-message",
+    route: "/message-management/edit-message/:id",
+    component: <EditMessage />,
+    type: "messages",
   },
 
 ];

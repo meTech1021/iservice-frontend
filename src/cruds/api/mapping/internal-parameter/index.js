@@ -166,14 +166,14 @@ function InternalParameterManagement() {
                     {ability.can("edit", "devices") && (
                         <Tooltip title="Edit Parameter">
                             <IconButton onClick={(e) => clickEditHandler(info.cell.row.original.id)}>
-                                <EditIcon />
+                                <MDTypography><EditIcon /></MDTypography>
                             </IconButton>
                         </Tooltip>
                     )}    
                     {ability.can("delete", "devices") && (
                         <Tooltip title="Delete Parameter">
                             <IconButton onClick={(e) => clickDeleteHandler(e, info.cell.row.original.id)}>
-                                <DeleteIcon />
+                                <MDTypography><DeleteIcon /></MDTypography>
                             </IconButton>
                         </Tooltip>
                     )}    

@@ -18,8 +18,8 @@ import { useState, useEffect } from "react";
 // @mui material components
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
-import { Autocomplete, Tooltip, IconButton, Badge, Typography } from "@mui/material";
-import { Select, MenuItem, InputLabel } from '@mui/material';
+import Modal from '@mui/material/Modal';
+import { Autocomplete, Tooltip, IconButton, Badge, Typography, CardContent } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 // Material Dashboard 2 PRO React components
@@ -40,6 +40,9 @@ import CrudService from "services/cruds-service";
 import { MODULE_MASTER } from "utils/constant";
 import DataTable from "examples/Tables/DataTable";
 import ModalMultiSelect from "../select-device";
+import Scrollbar from 'react-perfect-scrollbar'; // Import Scrollbar component
+import { Popover, List, ListItem, ListItemText } from '@mui/material';
+import { MESSAGE_TEMPLATE_VARIABLES } from "utils/constant";
 
 const NewMonitorDevice = () => {
     const navigate = useNavigate();
@@ -60,6 +63,8 @@ const NewMonitorDevice = () => {
     const [tempDevices, setTempDevices] = useState([]);     // this is to dispaly temp in data table of modal
     const [comparisonOperators, setComparisonOperators] = useState([]);
     const [thresholdTypes, setThresholdTypes] = useState([]);
+    const [alertTypes, setAlertTypes] = useState([]);
+    const [messageTemplates, setMessageTemplates] = useState([]);
 
     const [deviceParameters, setDeviceParameters] = useState([]);
     const [tempDeviceThresholds, setTempDeviceThresholds] = useState([]);       // temp data to be displayed in data table of modal
@@ -75,12 +80,15 @@ const NewMonitorDevice = () => {
     const [selectedThreRows, setSelectedThreRows] = useState([]);
     const [selectedParameterRows, setSelectedParameterRows] = useState([]);
 
+    const [alertContent, setAlertContent] = useState("");
+    const [anchorEl, setAnchorEl] = useState(null);
+    const variables = MESSAGE_TEMPLATE_VARIABLES;
+    
     useEffect(() => {
         (async () => {
         try {
             const response = await CrudService.getInternalRestDevices();
             setDevices(response.data);
-            console.log(response.data, 'response.data')
             setTempDevices(response.data);
         } catch (err) {
             console.error(err);
@@ -121,6 +129,27 @@ const NewMonitorDevice = () => {
             try {
                 const response = await CrudService.getThresholdTypes();
                 setThresholdTypes(response.data);
+            } catch (err) {
+                console.error(err);
+                return null;
+            }
+        })();
+
+        (async () => {
+            try {
+                const response = await CrudService.getAlertTypes();
+                setAlertTypes(response.data);
+            } catch (err) {
+                console.error(err);
+                return null;
+            }
+        })();
+
+        (async () => {
+            try {
+                const response = await CrudService.getMessages();
+                setMessageTemplates(response.data);
+                console.log(response.data, 'response.data')
             } catch (err) {
                 console.error(err);
                 return null;
@@ -173,6 +202,21 @@ const NewMonitorDevice = () => {
         setfrequency({ ...frequency, text: e.target.value });
     };
 
+    const handleVariableInsertion = (variable) => {
+        setAlertContent((prevContent) => `${prevContent}{${variable}}`); // Wrap the variable with '#' symbols
+
+        setAnchorEl(null);
+    };
+
+    const handleEditorChange = (value) => {
+        if(value.includes('#')) {
+            setAnchorEl(document.activeElement);
+            return;
+        }
+        setAlertContent(value);
+        // Check if the content includes '#' to show the variable list
+    };
+
     const removeParameter = (index) => {
         const updatedParameters = [...selectedParameters];
         updatedParameters.splice(index, 1);
@@ -199,6 +243,20 @@ const NewMonitorDevice = () => {
         const restDevices = devices.filter(param => !updatedDevice.some(updatedDevice => updatedDevice.device_id === param.device_id));
         setTempDevices(restDevices);
     }
+
+    const handleMsgModalOpen = (index) => {
+        const updatedDataTable = [...selectedThresholds];
+        updatedDataTable[index].alertModalOpen = true;
+        setSelectedThresholds(updatedDataTable);
+        setAlertContent(updatedDataTable[index].alert_content);
+    };
+
+    const handleMsgModalClose = (index) => {
+        const updatedDataTable = [...selectedThresholds];
+        updatedDataTable[index].alertModalOpen = false;
+        setSelectedThresholds(updatedDataTable);
+    };
+
 
     const getRows = () => {
         return selectedThresholds.map((row, index) => {
@@ -229,6 +287,7 @@ const NewMonitorDevice = () => {
                             <MDBox>
                                 <FormField
                                     required
+                                    InputLabelProps={{ shrink: true }}
                                     value={row.threshold_value}
                                     label="Value"
                                     onChange={(e) => handlethresholdValueChange(index, e.target.value)}
@@ -250,6 +309,115 @@ const NewMonitorDevice = () => {
                                 )}
                             />
                         ),
+                        alert_type: (
+                            <Autocomplete
+                                defaultValue={row?.AlertType || null}
+                                options={alertTypes}
+                                getOptionLabel={(option) => (option ? option.type_name : "")}
+                                onChange={(event, NewAlertType) => {
+                                    handleAlertTypeChange(index, NewAlertType);
+                                }}
+                                style={{ width: "140px" }}  
+                                renderInput={(params) => (
+                                    <FormField {...params} label="Alert Type" InputLabelProps={{ shrink: true }} required />
+                                )}
+                            />
+                        ),
+                        alert_content: (
+                            <MDBox key={row.parameter_id}>
+                                <MDButton onClick={() => handleMsgModalOpen(index)}>Alert Content</MDButton>                                
+                                <Modal
+                                        open={row.alertModalOpen ?? false}
+                                        onClose={() => handleMsgModalClose(index)}
+                                        aria-labelledby="modal-title"
+                                        aria-describedby="modal-description"
+                                    >
+                                    <Card
+                                        sx={{
+                                            position: 'absolute',
+                                            top: '50%',
+                                            left: '50%',
+                                            transform: 'translate(-50%, -50%)',
+                                            width: '80%', // Set the desired width here
+                                            backgroundColor: 'white',
+                                            border: '2px solid #000',
+                                            boxShadow: 24,
+                                            p: 4,
+                                        }}
+                                    >
+                                        <CardContent>
+                                            <Typography>Alert Content </Typography>
+
+                                            <Autocomplete
+                                                defaultValue={row?.MessageTemplate || null}
+                                                options={messageTemplates}
+                                                getOptionLabel={(option) => (option.attributes ? option.attributes.name : "")}
+                                                onChange={(event, NewEntity) => {
+                                                    if(NewEntity)
+                                                        setAlertContent(NewEntity.attributes.content);
+                                                    else
+                                                        setAlertContent([]);
+                                                    handleMessageTemplateChange(index, NewEntity);
+                                                }}
+                                                style={{ marginBottom: '10px' }}  
+                                                renderInput={(params) => (
+                                                    <FormField {...params} label="Message Template" InputLabelProps={{ shrink: true }} required />
+                                                )}
+                                            />
+
+                                            <MDEditor value={alertContent} onChange={handleEditorChange} style={{
+                                                maxHeight: '60vh', // Set max height to enable scrolling
+                                                overflowY: 'auto',    
+                                                overflowX: 'hidden'                                                                    
+                                            }}/>
+
+                                            <Popover
+                                                open={Boolean(anchorEl)}
+                                                anchorEl={anchorEl}
+                                                onClose={() => setAnchorEl(null)}
+                                                    anchorOrigin={{
+                                                    vertical: 'bottom',
+                                                    horizontal: 'left',
+                                                }}
+                                                transformOrigin={{
+                                                    vertical: 'top',
+                                                    horizontal: 'left',
+                                                }}
+                                            >
+                                                <Scrollbar style={{ maxHeight: '150px' }}>
+                                                    <List>
+                                                        <MDTypography>Message Template Variables</MDTypography>
+                                                        {variables.map((variable, index) => (
+                                                            <ListItem key={index} button onClick={() => handleVariableInsertion(variable)} >
+                                                                <ListItemText>
+                                                                    <MDTypography variant="body2">* {variable}</MDTypography>
+                                                                </ListItemText>
+                                                            </ListItem>
+                                                        ))}
+                                                    </List>
+                                                </Scrollbar>
+                                            </Popover>   
+                                            <MDBox ml="auto" mt={3} display="flex" justifyContent="flex-end">
+                                                <MDButton variant="contained" color="secondary" onClick={() => handleMsgModalClose(index)}>
+                                                    Cancel
+                                                </MDButton>
+                                                <MDButton variant="contained" color="info" onClick={() => handleAlertValueChange(index, alertContent)} style={{marginLeft: '10px'}}>
+                                                    Save
+                                                </MDButton>
+                                            </MDBox>
+                                        </CardContent>
+                                    </Card>
+                                </Modal>
+{/*                                 
+                                <FormField
+                                    required
+                                    InputLabelProps={{ shrink: true }}
+                                    value={row.alert_content}
+                                    label="Alert Content"
+                                    onChange={(e) => handleAlertValueChange(index, e.target.value)}
+                                /> */}
+                            </MDBox>
+                        ),    
                         alert_enabled: (
                             <Checkbox
                                 checked={row?.alert_enabled}
@@ -270,6 +438,8 @@ const NewMonitorDevice = () => {
             { Header: "Threshold Type", accessor: "threshold_type" },
             { Header: "Comparison Operator", accessor: "comparison_operator" },
             { Header: "Threshold Value", accessor: "threshold_value" },
+            { Header: "Alert Type", accessor: "alert_type" },
+            { Header: "Alert Content", accessor: "alert_content" },
             {
                 Header: "Alert Enabled",
                 accessor: 'alert_enabled'
@@ -284,7 +454,7 @@ const NewMonitorDevice = () => {
                       {(
                         <Tooltip title="Delete Parameter">
                           <IconButton onClick={() => removeThreshold(info.cell.row.index)}>
-                            <DeleteIcon />
+                            <MDTypography><DeleteIcon /></MDTypography>
                           </IconButton>
                         </Tooltip>
                       )}
@@ -311,7 +481,6 @@ const NewMonitorDevice = () => {
         return updatedInfo;
     }
 
-
     const tableParameterData = {
         columns: [
             { Header: "ID", accessor: "id" },
@@ -331,7 +500,7 @@ const NewMonitorDevice = () => {
                       {(
                         <Tooltip title="Delete Parameter">
                           <IconButton onClick={() => removeParameter(info.cell.row.index)}>
-                            <DeleteIcon />
+                            <MDTypography><DeleteIcon /></MDTypography>
                           </IconButton>
                         </Tooltip>
                       )}
@@ -378,7 +547,7 @@ const NewMonitorDevice = () => {
                 <MDBox display="flex" alignItems="center">
                     <Tooltip title="Delete Device">
                         <IconButton onClick={() => removeDevice(info.cell.row.index)}>
-                            <DeleteIcon />
+                            <MDTypography><DeleteIcon /></MDTypography>
                         </IconButton>
                     </Tooltip>
                 </MDBox>
@@ -468,6 +637,27 @@ const NewMonitorDevice = () => {
     const handleThresholdOperatorChange = (index, NewComparisonOperator) => {
         const updatedDataTable = [...selectedThresholds];
         updatedDataTable[index].comparison_operator_id = NewComparisonOperator?.id;
+        setSelectedThresholds(updatedDataTable);
+    };
+
+    const handleAlertTypeChange = (index, NewAlertType) => {
+        const updatedDataTable = [...selectedThresholds];
+        updatedDataTable[index].alert_type_id = NewAlertType?.alert_type_id;
+        setSelectedThresholds(updatedDataTable);
+    };
+
+    const handleMessageTemplateChange = (index, NewEntity) => {
+        const updatedDataTable = [...selectedThresholds];
+        updatedDataTable[index].message_template_id = NewEntity?.attributes?.id;
+        updatedDataTable[index].MessageTemplate = NewEntity;
+        setSelectedThresholds(updatedDataTable);
+    };
+
+    const handleAlertValueChange = (index, value) => {
+        const updatedDataTable = [...selectedThresholds];
+        updatedDataTable[index].alert_content = value;
+        updatedDataTable[index].alertModalOpen = false;
+        console.log(updatedDataTable, 'updatedDataTable')
         setSelectedThresholds(updatedDataTable);
     };
 
@@ -587,22 +777,6 @@ const NewMonitorDevice = () => {
                                         )}
                                     </MDBox>
                                     
-                                    {/* <Autocomplete
-                                        multiple
-                                        disableCloseOnSelect
-                                        defaultValue={[]}
-                                        options={devices}
-                                        getOptionLabel={(option) => (option.attributes ? option.attributes.name : "")}
-                                        value={device ?? ""}
-                                        onChange={(event, NewDevice) => {
-                                            setDevice(NewDevice);
-                                        }}
-                                        
-                                        renderInput={(params) => (
-                                            <FormField {...params} label="Device" InputLabelProps={{ shrink: true }} />
-                                        )}
-                                    /> */}
-
                                     <Autocomplete
                                         defaultValue=""
                                         options={statusDevice}
@@ -616,24 +790,6 @@ const NewMonitorDevice = () => {
                                         )}
                                     />   
                                     
-                                    {/* <Autocomplete
-                                        multiple
-                                        defaultValue={[]}
-                                        options={deviceParameters}
-                                        getOptionLabel={(option) => (option ? option.label : "")}
-                                        value={selectedParameters ?? ""}
-                                        onChange={(event, newParameter) => {
-                                            if (newParameter.some((option) => option.value === "all")) {
-                                                setSelectedParameters(deviceParameters.filter((option) => option.value !== "all"));
-                                            } else {
-                                                setSelectedParameters(newParameter);
-                                            }
-                                        }}
-                                        disableCloseOnSelect // Prevents the menu from closing on select
-                                        renderInput={(params) => (
-                                            <FormField {...params} label="Parameter" InputLabelProps={{ shrink: true }} />
-                                        )}
-                                    /> */}
                                     <ModalMultiSelect rowData={getDeviceRows(tempDevices)} selectedRows={selectedDeviceRows} setSelectedRows={setSelectedDeviceRows} label="Devices"/>                                    
                                     <DataTable table={tableDeviceData} canSearch={true} />
 

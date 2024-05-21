@@ -190,14 +190,14 @@ function CompanyManagement() {
               {ability.can("edit", "companies") && (
                 <Tooltip title="Edit Company">
                   <IconButton onClick={() => clickEditHandler(info.cell.row.original.id)}>
-                    <EditIcon />
+                    <MDTypography><EditIcon /></MDTypography>
                   </IconButton>
                 </Tooltip>
               )}
               {ability.can("delete", "companies") && (
                 <Tooltip title="Delete Company">
                   <IconButton onClick={(e) => clickDeleteHandler(e, info.cell.row.original.id)}>
-                    <DeleteIcon />
+                    <MDTypography><DeleteIcon /></MDTypography>
                   </IconButton>
                 </Tooltip>
               )}

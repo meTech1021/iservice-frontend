@@ -226,14 +226,14 @@ function EntityManagement() {
               {ability.can("edit", "entities") && (
                 <Tooltip title="Edit Entity">
                   <IconButton onClick={() => clickEditHandler(info.cell.row.original.id)}>
-                    <EditIcon />
+                    <MDTypography><EditIcon /></MDTypography>
                   </IconButton>
                 </Tooltip>
               )}
               {ability.can("delete", "entities") && (
                 <Tooltip title="Delete entity">
                   <IconButton onClick={(e) => clickDeleteHandler(e, info.cell.row.original.id)}>
-                    <DeleteIcon />
+                    <MDTypography><DeleteIcon /></MDTypography>
                   </IconButton>
                 </Tooltip>
               )}

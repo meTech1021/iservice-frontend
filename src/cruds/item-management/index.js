@@ -191,14 +191,14 @@ function ItemManagement() {
               {ability.can("edit", "items") && (
                 <Tooltip title="Edit Item">
                   <IconButton onClick={() => clickEditHandler(info.cell.row.original.id)}>
-                    <EditIcon />
+                    <MDTypography><EditIcon /></MDTypography>
                   </IconButton>
                 </Tooltip>
               )}
               {ability.can("delete", "items") && (
                 <Tooltip title="Delete Item">
                   <IconButton onClick={(e) => clickDeleteHandler(e, info.cell.row.original.id)}>
-                    <DeleteIcon />
+                    <MDTypography><DeleteIcon /></MDTypography>
                   </IconButton>
                 </Tooltip>
               )}

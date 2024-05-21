@@ -150,10 +150,10 @@ class CrudService {
     return await HttpService.get(thresholdTypesEndpoint);
   }
   
-  // getStatusTypes = async (moduleId) => {
-  //   const endpoint = `modules/status_types/${moduleId}`;
-  //   return await HttpService.post(endpoint);
-  // };
+  getAlertTypes = async () => {
+    const endpoint = `modules/alert_types`;
+    return await HttpService.get(endpoint);
+  };
 
   getStatusTypes = async (payload) => {
     const endpoint = "modules/status_types";
@@ -512,6 +512,33 @@ class CrudService {
   
     getAPI = async (id) => {
       const endpoint = `apis/${id}`
+      return await HttpService.get(endpoint);
+    }
+  
+    //////////// message template //////////////
+
+    getMessages = async () => {
+      const messagesEndpoint = "messages";
+      return await HttpService.get(messagesEndpoint);
+    };
+  
+    createMessage = async (payload) => {
+      const endpoint = "messages";
+      return await HttpService.post(endpoint, payload);
+    };
+  
+    updateMessage = async (payload, id) => {
+      const endpoint = `messages/${id}`;
+      return await HttpService.patch(endpoint, payload);
+    };
+  
+    deleteMessage = async (id) => {
+      const endpoint = `messages/${id}`;
+      return await HttpService.delete(endpoint);
+    };
+  
+    getMessage = async (id) => {
+      const endpoint = `messages/${id}`
       return await HttpService.get(endpoint);
     }
   

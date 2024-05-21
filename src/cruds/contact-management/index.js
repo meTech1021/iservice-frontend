@@ -169,14 +169,14 @@ function ContactManagement() {
               {ability.can("edit", "contacts") && (
                 <Tooltip title="Edit Contact">
                   <IconButton onClick={() => clickEditHandler(info.cell.row.original.id)}>
-                    <EditIcon />
+                    <MDTypography><EditIcon /></MDTypography>
                   </IconButton>
                 </Tooltip>
               )}
               {ability.can("delete", "contacts") && (
                 <Tooltip title="Delete Contact">
                   <IconButton onClick={(e) => clickDeleteHandler(e, info.cell.row.original.id)}>
-                    <DeleteIcon />
+                    <MDTypography><DeleteIcon /></MDTypography>
                   </IconButton>
                 </Tooltip>
               )}

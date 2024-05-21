@@ -221,14 +221,14 @@ const ModalAddress = ({addressTypes, statusOptions, addresses, setAddresses, sel
               {(
                 <Tooltip title="Delete Address">
                   <IconButton onClick={() => removeAddress(info.cell.row.original.id)}>
-                    <DeleteIcon />
+                    <MDTypography><DeleteIcon /></MDTypography>
                   </IconButton>
                 </Tooltip>
               )}
               {(
                 <Tooltip title="Edit Address">
                   <IconButton onClick={() => editAddress(info.cell.row.original.id)}>
-                    <EditIcon />
+                    <MDTypography><EditIcon /></MDTypography>
                   </IconButton>
                 </Tooltip>
               )}

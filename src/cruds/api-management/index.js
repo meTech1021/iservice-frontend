@@ -154,14 +154,14 @@ function APIManagement() {
               {ability.can("edit", "apis") && (
                 <Tooltip title="Edit API Parameters">
                   <IconButton onClick={() => clickEditHandler(info.cell.row.original.id)}>
-                    <EditIcon />
+                    <MDTypography><EditIcon /></MDTypography>
                   </IconButton>
                 </Tooltip>
               )}
               {ability.can("delete", "apis") && (
                 <Tooltip title="Delete API Parameters">
                   <IconButton onClick={(e) => clickDeleteHandler(e, info.cell.row.original.id)}>
-                    <DeleteIcon />
+                    <MDTypography><DeleteIcon /></MDTypography>
                   </IconButton>
                 </Tooltip>
               )}

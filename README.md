@@ -304,7 +304,7 @@ For showing or not the buttons for delete or edit in category section CASL helpe
     {ability.can("delete", "categories") && (
     <Tooltip title="Delete Category">
         <IconButton onClick={(e) => clickDeleteHandler(e, info.cell.row.original.id)}>
-        <DeleteIcon />
+        <MDTypography><DeleteIcon /></MDTypography>
         </IconButton>
     </Tooltip>
     )}

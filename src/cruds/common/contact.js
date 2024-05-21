@@ -302,14 +302,14 @@ const ModalContactAddress = ({phoneAddresses, setPhoneAddresses, emailAddresses,
               {(
                 <Tooltip title="Edit Contact">
                   <IconButton onClick={() => editAddress(info.cell.row.original.address_type_id, info.cell.row.original.id)}>
-                    <EditIcon />
+                    <MDTypography><EditIcon /></MDTypography>
                   </IconButton>
                 </Tooltip>
               )}
               {(
                 <Tooltip title="Delete Contact">
                   <IconButton onClick={() => removeAddress(info.cell.row.original.address_type_id, info.cell.row.original.id)}>
-                    <DeleteIcon />
+                    <MDTypography><DeleteIcon /></MDTypography>
                   </IconButton>
                 </Tooltip>
               )}
@@ -348,14 +348,14 @@ const ModalContactAddress = ({phoneAddresses, setPhoneAddresses, emailAddresses,
               {(
                 <Tooltip title="Edit Address">
                   <IconButton onClick={() => editAddress(info.cell.row.original.address_type_id, info.cell.row.original.id)}>
-                    <EditIcon />
+                    <MDTypography><EditIcon /></MDTypography>
                   </IconButton>
                 </Tooltip>
               )}
               {(
                 <Tooltip title="Delete Address">
                   <IconButton onClick={() => removeAddress(info.cell.row.original.address_type_id, info.cell.row.original.id)}>
-                    <DeleteIcon />
+                    <MDTypography><DeleteIcon /></MDTypography>
                   </IconButton>
                 </Tooltip>
               )}
@@ -394,14 +394,14 @@ const ModalContactAddress = ({phoneAddresses, setPhoneAddresses, emailAddresses,
               {(
                 <Tooltip title="Edit Address">
                   <IconButton onClick={() => editAddress(info.cell.row.original.address_type_id, info.cell.row.original.id)}>
-                    <EditIcon />
+                    <MDTypography><EditIcon /></MDTypography>
                   </IconButton>
                 </Tooltip>
               )}
               {(
                 <Tooltip title="Delete Address">
                   <IconButton onClick={() => removeAddress(info.cell.row.original.address_type_id, info.cell.row.original.id)}>
-                    <DeleteIcon />
+                    <MDTypography><DeleteIcon /></MDTypography>
                   </IconButton>
                 </Tooltip>
               )}

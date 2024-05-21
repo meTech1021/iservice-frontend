@@ -291,7 +291,7 @@ const ModalItem = ({moduleData, module, setModule, attributeValue, setAttributeV
               {(
                 <Tooltip title="Delete Item">
                   <IconButton onClick={(e) => removeItem(info.cell.row.index)}>
-                    <DeleteIcon />
+                    <MDTypography><DeleteIcon /></MDTypography>
                   </IconButton>
                 </Tooltip>
               )}

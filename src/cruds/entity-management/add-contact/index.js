@@ -161,7 +161,7 @@ const ModalContact = ({
             <MDBox display="flex" alignItems="center">
                 <Tooltip title="Delete Contact">
                     <IconButton onClick={clickDeleteHandler}>
-                    <DeleteIcon />
+                    <MDTypography><DeleteIcon /></MDTypography>
                     </IconButton>
                 </Tooltip>
             </MDBox>

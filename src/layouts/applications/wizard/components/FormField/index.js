@@ -15,17 +15,25 @@ Coded by www.creative-tim.com
 
 // prop-type is a library for typechecking of props
 import PropTypes from "prop-types";
-
-// Material Dashboard 2 PRO React components
 import MDInput from "components/MDInput";
 
-function FormField({ label, ...rest }) {
-  return <MDInput variant="standard" label={label} fullWidth {...rest} />;
+function FormField({ label, error, ...rest }) {
+  return (
+    <MDInput
+      variant="standard"
+      label={label}
+      fullWidth
+      error={!!error} // Convert error to boolean
+      helperText={error} // Optionally provide the error message
+      {...rest}
+    />
+  );
 }
 
 // typechecking props for FormField
 FormField.propTypes = {
   label: PropTypes.string.isRequired,
+  error: PropTypes.string, // Update the prop type to string or remove if not needed
 };
 
 export default FormField;

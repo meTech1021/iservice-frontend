@@ -91,7 +91,7 @@ const ModalMultiSelect = ({rowData, selectedRows, setSelectedRows, label }) => {
             </CardContent>
           </Card>
         </Modal>
-            </MDBox>
+      </MDBox>
   );
 };
 

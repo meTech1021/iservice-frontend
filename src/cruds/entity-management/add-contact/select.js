@@ -130,7 +130,7 @@ function ModalSelectContact({ open, setOpen, contacts, selectedContacts, setSele
             <MDBox display="flex" alignItems="center">
               <Tooltip title="Delete Contact">
                 <IconButton onClick={(e) => clickDeleteHandler(info.cell.row.original.id)}>
-                  <DeleteIcon />
+                  <MDTypography><DeleteIcon /></MDTypography>
                 </IconButton>
               </Tooltip>
             </MDBox>

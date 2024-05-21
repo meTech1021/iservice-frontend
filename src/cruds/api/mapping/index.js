@@ -145,7 +145,7 @@ function ExternalParameterManagement() {
                 {ability.can("edit", "devices") && (info.cell.row.original.status_type_id === 19) && (
                     <Tooltip title="Map Parameter">
                         <IconButton onClick={() => clickEditHandler(info.cell.row.original.id)}>
-                            <EditIcon />
+                            <MDTypography><EditIcon /></MDTypography>
                         </IconButton>
                     </Tooltip>
                 )}

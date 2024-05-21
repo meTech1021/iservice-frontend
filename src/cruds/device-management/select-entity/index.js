@@ -102,7 +102,7 @@ const ModalEntityAddressItemSelect = ({entityAddressItems, entityAddressItem, se
               {(
                 <Tooltip title="Delete Company">
                   <IconButton onClick={() => removeAddress(info.cell.row.original.id)}>
-                    <DeleteIcon />
+                    <MDTypography><DeleteIcon /></MDTypography>
                   </IconButton>
                 </Tooltip>
               )}

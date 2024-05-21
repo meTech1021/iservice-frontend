@@ -165,7 +165,7 @@ function CategoryManagement() {
                   onClick={(e) => clickDeleteHandler(e, info.cell.row.original.id)}
                 >
                   <IconButton>
-                    <DeleteIcon />
+                    <MDTypography><DeleteIcon /></MDTypography>
                   </IconButton>
                 </Tooltip>
               )}
@@ -175,7 +175,7 @@ function CategoryManagement() {
                   onClick={() => clickEditHandler(info.cell.row.original.id)}
                 >
                   <IconButton>
-                    <EditIcon />
+                    <MDTypography><EditIcon /></MDTypography>
                   </IconButton>
                 </Tooltip>
               )}

@@ -67,7 +67,7 @@ import ResetCover from "layouts/authentication/reset-password/cover";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { faUser, faInfo, faHistory, faContactBook } from "@fortawesome/free-solid-svg-icons";
+import { faUser, faInfo, faHistory, faContactBook, faMessage } from "@fortawesome/free-solid-svg-icons";
 import UserProfile from "cruds/user-profile";
 import RoleManagement from "cruds/role-managament";
 import CompanyManagement from "cruds/company-management";
@@ -92,6 +92,7 @@ import ExternalDeviceManagement from "cruds/device-management/external-device-ma
 import MonitorManagement from "cruds/device-management/monitor-management";
 import ExternalParameterManagement from "cruds/api/mapping";
 import InternalParameterManagement from "cruds/api/mapping/internal-parameter";
+import MessageTemplate from "cruds/message-management";
 
 const routes = [
   {
@@ -222,7 +223,21 @@ const routes = [
       },
     ],
   },
+
   { type: "divider", key: "divider-1" },
+
+  {
+    type: "collapse",
+    icon: <FontAwesomeIcon icon={faMessage} size="sm" />,
+    name: "Message Template",
+    key: "changelog",
+    route: "/message-management",
+    component: <MessageTemplate />,
+    noCollapse: true,
+
+  },
+  { type: "divider", key: "divider-2" },
+
   {
     type: "collapse",
     name: "Entities",

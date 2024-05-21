@@ -150,7 +150,6 @@ function InternalDeviceManagement() {
       let badgeContent = row?.status_type_map_id === 19 ? 'Mapped' : 'Not Mapped';
           
       return {
-        type: "devices",
         id: row.id,
         name: row.attributes?.name,
         type: row.attributes.DeviceType?.type_name,
@@ -232,14 +231,14 @@ function InternalDeviceManagement() {
               {ability.can("edit", "devices") && (
                 <Tooltip title="Edit Devoce">
                   <IconButton onClick={() => clickEditHandler(info.cell.row.original.id)}>
-                    <EditIcon />
+                    <MDTypography><EditIcon /></MDTypography>
                   </IconButton>
                 </Tooltip>
               )}
               {ability.can("delete", "devices") && (
                 <Tooltip title="Delete Device">
                   <IconButton onClick={(e) => clickDeleteHandler(e, info.cell.row.original.id)}>
-                    <DeleteIcon />
+                    <MDTypography><DeleteIcon /></MDTypography>
                   </IconButton>
                 </Tooltip>
               )}
