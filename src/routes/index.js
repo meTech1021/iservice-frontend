@@ -230,7 +230,7 @@ const routes = [
     type: "collapse",
     icon: <FontAwesomeIcon icon={faMessage} size="sm" />,
     name: "Message Template",
-    key: "changelog",
+    key: "messagetemplate",
     route: "/message-management",
     component: <MessageTemplate />,
     noCollapse: true,

@@ -1,36 +1,13 @@
-/**
-=========================================================
-* Material Dashboard 2 PRO React - v2.1.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-pro-react
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
-/**
-  This file is used for controlling the global states of the components,
-  you can customize the states for the different components here.
-*/
-
-import { createContext, useContext, useEffect, useMemo, useReducer, useState } from "react";
-
-// prop-types is a library for typechecking of props
+import { createContext, useContext, useEffect, useMemo, useReducer, useState, useCallback } from "react";
 import PropTypes from "prop-types";
 import { useLocation, useNavigate } from "react-router-dom";
-
 import CrudService from "services/cruds-service";
 import AuthService from "services/auth-service";
 
 // The Material Dashboard 2 PRO React main context
 const MaterialUI = createContext();
 
-// the authentication context
+// The authentication context
 export const AuthContext = createContext({
   isAuthenticated: false,
   login: () => {},
@@ -48,33 +25,31 @@ const AuthContextProvider = ({ children }) => {
 
   const token = localStorage.getItem("token");
 
-  useEffect(() => {
+  const checkAuthentication = useCallback(() => {
     if (!token) return;
 
     setIsAuthenticated(true);
     navigate(location.pathname);
-  }, []);
+  }, [token, location.pathname, navigate]);
 
   useEffect(() => {
-    if (!token) return;
-    console.log(token, 'token')
-    navigate(location.pathname);
-  }, [isAuthenticated]);
+    checkAuthentication();
+  }, [checkAuthentication]);
 
-  const login = (newToken) => {
-    console.log(newToken, 'newToken')
+  const login = useCallback((newToken) => {
+    console.log(newToken, 'newToken');
     localStorage.setItem("token", newToken);
     setIsAuthenticated(true);
     navigate("/dashboard/analytics");
-  };
+  }, [navigate]);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem("token");
     setIsAuthenticated(false);
     navigate("/auth/login");
-  };
+  }, [navigate]);
 
-  const getCurrentUser = async () => {
+  const getCurrentUser = useCallback(async () => {
     try {
       const res = await AuthService.getProfile();
       return res.data.id;
@@ -82,17 +57,13 @@ const AuthContextProvider = ({ children }) => {
       console.error(err);
       return null;
     }
-  };
+  }, []);
 
-  const getRole = async () => {
-    // first get the current user id
+  const getRole = useCallback(async () => {
     const id = await getCurrentUser();
     try {
-      // second I get the user with role
       const res = await CrudService.getUser(id);
-      // const roleId = res.data.relationships.roles.data[0].id;
       const roleId = 1;
-      // third check the role id and return the role type
       if (roleId === "1") {
         return "admin";
       }
@@ -107,7 +78,7 @@ const AuthContextProvider = ({ children }) => {
       console.error(err);
       return null;
     }
-  };
+  }, [getCurrentUser]);
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, login, logout, getRole, getCurrentUser }}>
@@ -115,9 +86,6 @@ const AuthContextProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
-// Setting custom name for the context which is visible on react dev tools
-MaterialUI.displayName = "MaterialUIContext";
 
 // Material Dashboard 2 PRO React reducer
 function reducer(state, action) {
@@ -185,9 +153,7 @@ function useMaterialUIController() {
   const context = useContext(MaterialUI);
 
   if (!context) {
-    throw new Error(
-      "useMaterialUIController should be used inside the MaterialUIControllerProvider."
-    );
+    throw new Error("useMaterialUIController should be used inside the MaterialUIControllerProvider.");
   }
 
   return context;
